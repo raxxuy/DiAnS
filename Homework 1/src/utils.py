@@ -1,4 +1,6 @@
 import asyncio
+import time
+
 from aiohttp import ClientSession
 from aiolimiter import AsyncLimiter
 from datetime import datetime, timedelta
@@ -65,9 +67,12 @@ async def fetch_stock_history(code):
         async with limiter:  # Apply rate limiting
             async with ClientSession() as session:
                 async with session.get(url_) as response:
+                    if response.status != 200:
+                        time.sleep(1)
+                        return await fetch_data(url_)
+
                     response_text = await response.text()
-                    strainer = SoupStrainer('tbody')
-                    soup = BeautifulSoup(response_text, 'lxml', parse_only=strainer)
+                    soup = BeautifulSoup(response_text, 'lxml', parse_only=SoupStrainer('tbody'))
 
                     rows = soup.select("tbody tr")
                     fetched_data = []
@@ -79,9 +84,9 @@ async def fetch_stock_history(code):
                     return fetched_data
 
     while to_time > from_time:
-        to_date = to_time.strftime("%m,%d,%Y")
-        from_date = from_time.strftime("%m,%d,%Y")
-        url = f"https://www.mse.mk/en/stats/symbolhistory/{code}?FromDate={from_date}&ToDate={to_date}"
+        to_date = to_time.strftime("%d,%m,%Y")
+        from_date = from_time.strftime("%d,%m,%Y")
+        url = f"https://www.mse.mk/mk/stats/symbolhistory/{code}?FromDate={from_date}&ToDate={to_date}"
         tasks.append(fetch_data(url))
         to_time -= timedelta(days=365)
 

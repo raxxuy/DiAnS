@@ -53,14 +53,14 @@ class Database:
                 id SERIAL PRIMARY KEY,
                 issuer_id INTEGER NOT NULL REFERENCES Issuer(id) ON DELETE CASCADE,
                 date DATE NOT NULL,
-                last_trade_price DECIMAL(12, 2) NOT NULL,
-                max_price DECIMAL(12, 2) NOT NULL,
-                min_price DECIMAL(12, 2) NOT NULL,
-                avg_price DECIMAL(12, 2) NOT NULL,
-                percent_change DECIMAL(12, 4) NOT NULL,
-                volume BIGINT NOT NULL,
-                turnover_best BIGINT NOT NULL,
-                total_turnover BIGINT NOT NULL,
+                last_trade_price VARCHAR(255) NOT NULL,
+                max_price VARCHAR(255) NOT NULL,
+                min_price VARCHAR(255) NOT NULL,
+                avg_price VARCHAR(255) NOT NULL,
+                percent_change VARCHAR(255) NOT NULL,
+                volume VARCHAR(255) NOT NULL,
+                turnover_best VARCHAR(255) NOT NULL,
+                total_turnover VARCHAR(255) NOT NULL,
                 CONSTRAINT unique_stock_entry UNIQUE (issuer_id, date)
             );
             """

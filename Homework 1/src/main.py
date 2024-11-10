@@ -52,9 +52,7 @@ async def get_last_available_date(issuer_code):
             issuer_id = await db.assign_issuer(issuer_code, company_data)
 
             entries = [
-                [issuer_id, datetime.strptime(stock_entry[0], "%m/%d/%Y").date()] +
-                [float(el.replace(",", "")) for el in stock_entry[1:6]] +
-                [int(el.replace(",", "")) for el in stock_entry[6:]]
+                [issuer_id, datetime.strptime(stock_entry[0].replace(".", "/"), "%d/%m/%Y").date()] + stock_entry[1:]
                 for stock_entry in reversed(stock_history)
             ]
 
