@@ -1,13 +1,16 @@
 import asyncio
 from aiohttp import ClientSession
+from aiolimiter import AsyncLimiter
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, SoupStrainer
 
+limiter = AsyncLimiter(max_rate=10, time_period=1)
 
 async def fetch_company(code):
     url = f"https://www.mse.mk/en/symbol/{code}"
 
     company_data = {
+        "Code": code,
         "Name": "",
         "Address": "",
         "City": "",
@@ -29,7 +32,7 @@ async def fetch_company(code):
             title = soup.select_one("div.title")
 
             if title is None:
-                return code
+                return [code, code]
 
             company_data["Name"] = title.text
             details = soup.select("div#izdavach .row")[2:13]
@@ -57,33 +60,28 @@ async def fetch_stock_history(code):
 
     data = []
     tasks = []
-    semaphore = asyncio.Semaphore(10)
 
     async def fetch_data(url_):
-        async with semaphore:
+        async with limiter:  # Apply rate limiting
             async with ClientSession() as session:
                 async with session.get(url_) as response:
-
                     response_text = await response.text()
                     strainer = SoupStrainer('tbody')
                     soup = BeautifulSoup(response_text, 'lxml', parse_only=strainer)
 
                     rows = soup.select("tbody tr")
                     fetched_data = []
-
                     for row in rows:
                         cols = [col.text.strip() for col in row.select("td")]
                         if any(col == "" for col in cols):
                             continue
                         fetched_data.append(cols)
-
                     return fetched_data
 
     while to_time > from_time:
         to_date = to_time.strftime("%m,%d,%Y")
         from_date = from_time.strftime("%m,%d,%Y")
         url = f"https://www.mse.mk/en/stats/symbolhistory/{code}?FromDate={from_date}&ToDate={to_date}"
-
         tasks.append(fetch_data(url))
         to_time -= timedelta(days=365)
 

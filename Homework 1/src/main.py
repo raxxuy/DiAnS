@@ -22,22 +22,18 @@ def timer(func):
 # Filter 1
 @timer
 async def fetch_issuers():
-    bonds = ['CKB', 'SNBTO', 'TTK'] # Excluded issuers
     url = "https://www.mse.mk/en/stats/symbolhistory/ADIN"
+    excluded = ['CKB', 'SNBTO', 'TTK'] # Excluded issuers (Bonds)
+    issuers = []
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-
             response_text = await response.text()
-            strainer = SoupStrainer("select")
-            soup = BeautifulSoup(response_text, "lxml", parse_only=strainer)
+            soup = BeautifulSoup(response_text, "lxml", parse_only=SoupStrainer("select"))
 
-            issuers = []
-            options = soup.select("select > option")
-
-            for option in options:
+            for option in soup.select("select > option"):
                 code = option.get("value")
-                if code not in bonds and not any(char.isdigit() for char in code):
+                if code not in excluded and not any(char.isdigit() for char in code):
                     issuers.append(code)
 
             return issuers
@@ -52,10 +48,9 @@ async def get_last_available_date(issuer_code):
         company_data = await utils.fetch_company(issuer_code)
         stock_history = await utils.fetch_stock_history(issuer_code)
 
-        company_id = await db.add_company(*company_data) if type(company_data) is list else await db.add_company(company_data)
-        issuer_id = await db.add_issuer(issuer_code, company_id)
-
         if stock_history:
+            issuer_id = await db.assign_issuer(issuer_code, company_data)
+
             entries = [
                 [issuer_id, datetime.strptime(stock_entry[0], "%m/%d/%Y").date()] +
                 [float(el.replace(",", "")) for el in stock_entry[1:6]] +
@@ -72,11 +67,11 @@ async def get_last_available_date(issuer_code):
 
 # Filter 3
 @timer
-async def fill_in_missing_data(issuer_code, date):
-    if date is None:
+async def fill_in_missing_data(issuer_code, last_date):
+    if not last_date:
         return
 
-    stock_entry = (await db.find_stock_entry(issuer_code, date))[1:]
+    stock_entry = (await db.find_stock_entry(issuer_code, last_date))[1:]
     start_date = stock_entry[1] + timedelta(days=1)
     end_date = datetime.now().date()
     days = (end_date - start_date).days
@@ -94,13 +89,22 @@ async def main():
     await db.connect()
     await db.create_tables()
 
-    issuers = await fetch_issuers() # Filter 1
+    # Pipe section
+    try:
+        issuers = await fetch_issuers() # Filter 1
 
-    for issuer in issuers:
-        last_date = await get_last_available_date(issuer) # Filter 2
-        await fill_in_missing_data(issuer, last_date) # Filter 3
+        semaphore = asyncio.Semaphore(5)
 
-    await db.close()
+        async def sem_task(issuer):
+            async with semaphore:
+                last_date = await get_last_available_date(issuer) # Filter 2
+                await fill_in_missing_data(issuer, last_date) # Filter 3
+
+        tasks = [sem_task(issuer) for issuer in issuers]
+        await asyncio.gather(*tasks)
+
+    finally:
+        await db.close()
 
 if __name__ == "__main__":
     db = Database(user="postgres", password="postgres", database="DB")
