@@ -22,17 +22,17 @@ def timer(func):
 # Filter 1
 @timer
 async def fetch_issuers():
-    url = "https://www.mse.mk/en/stats/symbolhistory/ADIN"
+    url = "https://www.mse.mk/en/stats/current-schedule"
     excluded = ['CKB', 'SNBTO', 'TTK'] # Excluded issuers (Bonds)
     issuers = []
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             response_text = await response.text()
-            soup = BeautifulSoup(response_text, "lxml", parse_only=SoupStrainer("select"))
+            soup = BeautifulSoup(response_text, "lxml", parse_only=SoupStrainer("tbody"))
 
-            for option in soup.select("select > option"):
-                code = option.get("value")
+            for row in soup.select("tr"):
+                code = row.select("td")[0].text.strip()
                 if code not in excluded and not any(char.isdigit() for char in code):
                     issuers.append(code)
 
