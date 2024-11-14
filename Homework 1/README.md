@@ -1,6 +1,10 @@
 # Web scraping the Macedonian Stock Exchange
 For this homework project, we developed a web scraper in Python to extract real-time stock data from the Macedonian Stock Exchange website. Using asynchronous programming with aiohttp and BeautifulSoup, the scraper retrieves company details and historical stock data directly from MSE’s public pages. Collected data is stored in a PostgreSQL database, making it accessible for financial analysis and insights.
 
+# Time taken to fill the database
+![runtime](https://github.com/user-attachments/assets/e4962b9f-2f8c-4cf6-9322-cd8c299d4c3a)
+
+
 # Prerequisites
 - Python 3.8 or higher
 - PostgreSQL (local or Docker-based)
