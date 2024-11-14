@@ -1,10 +1,10 @@
-import asyncio
 import time
-
+import asyncio
 from aiohttp import ClientSession
 from aiolimiter import AsyncLimiter
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, SoupStrainer
+
 
 limiter = AsyncLimiter(max_rate=10, time_period=1)
 
@@ -28,13 +28,19 @@ async def fetch_company(code):
         async with session.get(url) as response:
 
             response_text = await response.text()
-            strainer = SoupStrainer('div', {'class': 'tab-content panel-body', 'id': "izdavach"})
+            strainer = SoupStrainer('div', {'class': 'panel panel-default'})
             soup = BeautifulSoup(response_text, 'lxml', parse_only=strainer)
 
             title = soup.select_one("div.title")
 
             if title is None:
-                return [code, code]
+                title = soup.select_one("div#titleKonf2011")
+
+                if title:
+                    return [code, title.text.split(" - ")[2]]
+                else:
+                    print(f"{code} title could not be found")
+                    return [code, code]
 
             company_data["Name"] = title.text
             details = soup.select("div#izdavach .row")[2:13]
@@ -93,8 +99,8 @@ async def fetch_stock_history(code):
     results = await asyncio.gather(*tasks)
 
     for result in results:
-        for cols in result:
-            if cols not in data:
-                data.append(cols)
+        for row in result:
+            if row not in data:
+                data.append(row)
 
     return data

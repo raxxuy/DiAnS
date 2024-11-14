@@ -16,7 +16,8 @@ class Database:
             password=self.password,
             database=self.database,
             host=self.host,
-            min_size=1
+            min_size=1,
+            max_size=15
         )
 
     async def close(self):

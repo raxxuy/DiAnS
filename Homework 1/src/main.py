@@ -3,6 +3,7 @@ import asyncio
 import time
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, SoupStrainer
+from multiprocessing import Pool
 import utils
 from db import Database
 
@@ -23,7 +24,7 @@ def timer(func):
 @timer
 async def fetch_issuers():
     url = "https://www.mse.mk/en/stats/current-schedule"
-    excluded = ['CKB', 'SNBTO', 'TTK'] # Excluded issuers (Bonds)
+    excluded = ['CKB', 'SNBTO', 'TTK']
     issuers = []
 
     async with aiohttp.ClientSession() as session:
@@ -41,13 +42,14 @@ async def fetch_issuers():
 
 # Filter 2
 @timer
-async def get_last_available_date(issuer_code):
+async def get_last_available_date(db, issuer_code):
     found = await db.find_issuer_by_code(issuer_code)
 
     if found is None:
         company_data = await utils.fetch_company(issuer_code)
         stock_history = await utils.fetch_stock_history(issuer_code)
 
+        # Issuers that have stock entries will be added to the database
         if stock_history:
             issuer_id = await db.assign_issuer(issuer_code, company_data)
 
@@ -65,7 +67,7 @@ async def get_last_available_date(issuer_code):
 
 # Filter 3
 @timer
-async def fill_in_missing_data(issuer_code, last_date):
+async def fill_in_missing_data(db, issuer_code, last_date):
     if not last_date:
         return
 
@@ -82,29 +84,35 @@ async def fill_in_missing_data(issuer_code, last_date):
     await db.batch_add_stock_entries(entries)
 
 
-@timer
-async def main():
-    await db.connect()
-    await db.create_tables()
+def sync_process_issuer(db_params, issuer_code):
+    db = Database(**db_params)
 
-    # Pipe section
-    try:
-        issuers = await fetch_issuers() # Filter 1
+    async def fetch_last_date_and_fill():
+        await db.connect()
 
-        semaphore = asyncio.Semaphore(5)
+        last_date = await get_last_available_date(db, issuer_code) # Filter 2
+        if last_date:
+            await fill_in_missing_data(db, issuer_code, last_date) # Filter 3
 
-        async def sem_task(issuer):
-            async with semaphore:
-                last_date = await get_last_available_date(issuer) # Filter 2
-                await fill_in_missing_data(issuer, last_date) # Filter 3
-
-        tasks = [sem_task(issuer) for issuer in issuers]
-        await asyncio.gather(*tasks)
-
-    finally:
         await db.close()
 
-if __name__ == "__main__":
-    db = Database(user="postgres", password="postgres", database="DB")
+    asyncio.run(fetch_last_date_and_fill())
 
+
+@timer
+async def main():
+    db_params = {"user": "postgres", "password": "postgres", "database": "DB"}
+    db = Database(**db_params)
+    await db.connect()
+    await db.create_tables()
+    await db.close()
+
+    issuers = await fetch_issuers() # Filter 1
+
+    with Pool(processes=12) as pool:
+        # Run filter 2 and 3 for each issuer in parallel
+        pool.starmap(sync_process_issuer, [(db_params, issuer) for issuer in issuers])
+
+
+if __name__ == "__main__":
     asyncio.run(main())
