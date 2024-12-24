@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+} */
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+@layer components {
+  /* General */
+  .select-md {
+    @apply bg-zinc-800 border border-zinc-700 rounded-lg p-2;
+  }
+
+  /* Market Data */
+  .market-data-td {
+    @apply border border-zinc-700 p-3;
+  }
+
+  .market-data-header {
+    @apply text-4xl font-bold;
+  }
+
+  .market-data-subheader {
+    @apply text-zinc-400 mt-2;
+  }
+
+  .market-data-issuer-title {
+    @apply text-2xl font-bold text-zinc-200;
+  }
+
+  .market-data-table {
+    @apply overflow-x-auto border border-zinc-700/30;
+  }
+
+  .market-data-table-header {
+    @apply bg-zinc-800/80 text-left *:market-data-td;
+  }
+
+  .market-data-row {
+    @apply hover:bg-zinc-800/50 transition-colors duration-200 *:market-data-td;
+  }
+
+  .market-data-chart {
+    @apply bg-zinc-900 p-6 rounded-xl border border-zinc-800 h-[600px];
+  }
+
+  .market-data-controls {
+    @apply flex flex-wrap gap-4;
+  }
+
+  /* Main Section */
+  .primary-button {
+    @apply px-8 py-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-emerald-500/25;
+  }
+
+  .secondary-button {
+    @apply px-8 py-3 bg-zinc-800/50 text-white rounded-lg font-semibold border border-zinc-700/30 hover:border-zinc-600/50 transition-all duration-300;
+  }
+
+  .trending-arrow {
+    @apply drop-shadow-[0_0_3px_rgba(34,197,94,0.5)] group-hover:drop-shadow-[0_0_8px_rgba(34,197,94,0.7)] transition-all duration-300;
+  }
+
+  /* Issuers */
+  .issuer-card {
+    @apply bg-zinc-800/50 backdrop-blur-sm rounded-xl p-6 border border-zinc-700/30 
+    hover:border-zinc-600/50 transition-all duration-300 cursor-pointer
+    hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-1;
+  }
+
+  .issuer-code {
+    @apply text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r 
+    from-indigo-400 to-indigo-500 group-hover:from-[#c686ff] 
+    group-hover:to-[#a74ccd] transition-all duration-300;
+  }
+
+  .issuer-tag {
+    @apply text-xs px-2 py-1 rounded-full bg-zinc-700/30 text-zinc-400 
+    group-hover:bg-[#bf65fb]/10 group-hover:text-[#bf65fb] transition-all duration-300;
+  }
+
+  /* Issuer Detail */
+  .issuer-detail-card {
+    @apply bg-zinc-800/50 backdrop-blur-sm rounded-xl p-6 border border-zinc-700/30;
+  }
+
+  .issuer-detail-title {
+    @apply text-xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400;
+  }
+
+  .issuer-detail-header {
+    @apply text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-500;
+  }
+
+  .issuer-detail-button {
+    @apply px-4 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors duration-300;
+  }
+
+  .issuer-detail-field {
+    @apply space-y-4 text-zinc-300;
+  }
+
+  .issuer-detail-label {
+    @apply text-zinc-400 text-sm;
+  }
+
+  .issuer-detail-value {
+    @apply font-medium;
+  }
+
+  /* News */
+  .news-header {
+    @apply text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400;
+  }
+
+  .news-subheader {
+    @apply text-zinc-400 mt-2;
+  }
+
+  .news-card {
+    @apply bg-zinc-800/50 backdrop-blur-sm rounded-xl p-6 border border-zinc-700/30 
+      hover:border-zinc-600/50 transition-all duration-300
+      hover:shadow-lg hover:shadow-zinc-500/5 hover:-translate-y-1;
+  }
+
+  .news-title {
+    @apply text-xl font-semibold text-zinc-100 group-hover:text-white transition-colors duration-300;
+  }
+
+  .news-date {
+    @apply flex items-center gap-2 text-zinc-400 group-hover:text-zinc-300 transition-colors duration-300;
+  }
+
+  .news-pagination-button {
+    @apply px-4 py-2 rounded-xl bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/30
+      disabled:opacity-50 disabled:cursor-not-allowed 
+      hover:border-zinc-600/50 hover:shadow-lg hover:shadow-zinc-500/5
+      transition-all duration-300 flex items-center gap-2;
+  }
+
+  .news-pagination-current {
+    @apply px-4 py-2 rounded-xl bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/30;
+  }
+
+  /* Predictions */
+  .predictions-header {
+    @apply text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400;
+  }
+
+  .predictions-subheader {
+    @apply text-zinc-400 mt-2;
+  }
+}
