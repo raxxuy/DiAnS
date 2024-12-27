@@ -12,6 +12,7 @@ import {
   CCI,
   WilliamsR,
 } from "technicalindicators";
+import { MACDOutput } from "technicalindicators/declarations/moving_averages/MACD";
 
 interface StockData {
   date: Date;
@@ -23,7 +24,7 @@ interface StockData {
 interface TechnicalIndicator {
   date: Date;
   value: number | number[];
-  signal?: "buy" | "sell" | "hold";
+  signal: "buy" | "sell" | "hold";
 }
 
 export interface AnalysisResult {
@@ -140,15 +141,15 @@ function calculateOscillators(data: StockData[], period: number) {
     rsi: rsiValues.map((value, i) => ({
       date: paddedDates[i],
       value,
-      signal: generateOscillatorSignal("rsi", value),
+      signal: generateRSISignal(value),
     })),
-    macd: macdValues.map((value: any, i) => ({
+    macd: macdValues.map((value: MACDOutput, i) => ({
       date: paddedDates[i],
       value: [value.MACD, value.signal, value.histogram],
       signal: generateMACDSignal({
-        MACD: value.MACD,
-        signal: value.signal,
-        histogram: value.histogram
+        MACD: value.MACD!,
+        signal: value.signal!,
+        histogram: value.histogram!
       }),
     })),
     stochastic: stochValues.map((value, i) => ({
@@ -175,12 +176,9 @@ function generateSignal(indicatorValue: number, price: number): "buy" | "sell" |
   return "hold";
 }
 
-function generateOscillatorSignal(type: string, value: number): "buy" | "sell" | "hold" {
-  if (type === "rsi") {
-    if (value < 30) return "buy";
-    if (value > 70) return "sell";
-    return "hold";
-  }
+function generateRSISignal(value: number): "buy" | "sell" | "hold" {
+  if (value < 30) return "buy";
+  if (value > 70) return "sell";
   return "hold";
 }
 
@@ -210,7 +208,7 @@ function generateWilliamsRSignal(value: number): "buy" | "sell" | "hold" {
 
 export function analyzeTechnicalIndicators(rawData: stockhistory[]): AnalysisResult[] {
   const data = convertStockHistory(rawData);
-  
+
   const minDataPoints = {
     day: 14,
     week: 30,
@@ -219,7 +217,7 @@ export function analyzeTechnicalIndicators(rawData: stockhistory[]): AnalysisRes
 
   // Only analyze periods that have enough data
   const periods = Object.entries(minDataPoints)
-    .filter(([_, requiredPoints]) => data.length >= requiredPoints)
+    .filter(([, requiredPoints]) => data.length >= requiredPoints)
     .reduce((acc, [period, points]) => ({
       ...acc,
       [period]: points
@@ -253,7 +251,7 @@ export function analyzeTechnicalIndicators(rawData: stockhistory[]): AnalysisRes
     },
     oscillators: {
       rsi: result.oscillators.rsi,
-      macd: result.oscillators.macd,
+      macd: result.oscillators.macd as TechnicalIndicator[],
       stochastic: result.oscillators.stochastic,
       cci: result.oscillators.cci,
       williamsR: result.oscillators.williamsR,

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }, { status: 404 });
   }
 
-  const analysis = analyzeTechnicalIndicators(stockHistory.reverse());
+  const analysis = analyzeTechnicalIndicators(stockHistory);
 
   const getIndicatorData = (period: string, type: "oscillators" | "movingAverages", indicator: string) => {
     const result = analysis.find(a => a.period === period);
