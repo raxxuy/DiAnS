@@ -1,9 +1,10 @@
-import { analyzeTechnicalIndicators } from '@/lib/predictions/technical';
+import { analyzeTechnicalIndicators } from "@/lib/predictions/technical";
 import { getStockHistoryByIssuerId } from "@/lib/db/actions/stocks";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { AnalysisResult } from "@/lib/predictions/technical";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
   const issuer_id = searchParams.get("issuer_id");
 
   if (!issuer_id) {
@@ -11,120 +12,56 @@ export async function GET(request: Request) {
   }
 
   const stockHistory = await getStockHistoryByIssuerId(parseInt(issuer_id));
-  
+
   if (!stockHistory || stockHistory.length < 14) {
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: "Insufficient data",
       message: "Not enough historical data available for technical analysis"
     }, { status: 404 });
   }
 
-  const analysis = analyzeTechnicalIndicators(stockHistory);
+  const analysis = analyzeTechnicalIndicators(stockHistory.reverse());
+
+  const getIndicatorData = (period: string, type: "oscillators" | "movingAverages", indicator: string) => {
+    const result = analysis.find(a => a.period === period);
+
+    const data = type === "oscillators"
+      ? result?.oscillators[indicator as keyof AnalysisResult["oscillators"]].at(-1)
+      : result?.movingAverages[indicator as keyof AnalysisResult["movingAverages"]].at(-1);
+
+    const value = Array.isArray(data?.value) ? data.value[0] : data?.value;
+
+    return {
+      value: value || 0,
+      signal: data?.signal || "hold"
+    };
+  };
+
+  const createIndicator = (name: string, type: string, indicatorType: "oscillators" | "movingAverages", indicator: string) => ({
+    name,
+    type,
+    values: {
+      daily: getIndicatorData("day", indicatorType, indicator).value,
+      weekly: getIndicatorData("week", indicatorType, indicator).value,
+      monthly: getIndicatorData("month", indicatorType, indicator).value,
+    },
+    signal: getIndicatorData("day", indicatorType, indicator).signal
+  });
 
   const oscillators = [
-    {
-      name: "RSI",
-      type: "oscillator",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.oscillators?.rsi?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.oscillators?.rsi?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.oscillators?.rsi?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.oscillators?.rsi?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "MACD",
-      type: "oscillator",
-      values: {
-        daily: (analysis.find(a => a.period === 'day')?.oscillators?.macd?.at?.(-1)?.value as number[])?.[0] || 0,
-        weekly: (analysis.find(a => a.period === 'week')?.oscillators?.macd?.at?.(-1)?.value as number[])?.[0] || 0,
-        monthly: (analysis.find(a => a.period === 'month')?.oscillators?.macd?.at?.(-1)?.value as number[])?.[0] || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.oscillators?.macd?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "Stochastic",
-      type: "oscillator",
-      values: {
-        daily: (analysis.find(a => a.period === 'day')?.oscillators?.stochastic?.at?.(-1)?.value as number[])?.[0] || 0,
-        weekly: (analysis.find(a => a.period === 'week')?.oscillators?.stochastic?.at?.(-1)?.value as number[])?.[0] || 0,
-        monthly: (analysis.find(a => a.period === 'month')?.oscillators?.stochastic?.at?.(-1)?.value as number[])?.[0] || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.oscillators?.stochastic?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "CCI",
-      type: "oscillator",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.oscillators?.cci?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.oscillators?.cci?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.oscillators?.cci?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.oscillators?.cci?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "Williams %R",
-      type: "oscillator",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.oscillators?.williamsR?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.oscillators?.williamsR?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.oscillators?.williamsR?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.oscillators?.williamsR?.at?.(-1)?.signal || "hold"
-    }
+    createIndicator("RSI", "oscillator", "oscillators", "rsi"),
+    createIndicator("MACD", "oscillator", "oscillators", "macd"),
+    createIndicator("Stochastic", "oscillator", "oscillators", "stochastic"),
+    createIndicator("CCI", "oscillator", "oscillators", "cci"),
+    createIndicator("Williams %R", "oscillator", "oscillators", "williamsR")
   ];
 
   const movingAverages = [
-    {
-      name: "SMA",
-      type: "ma",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.movingAverages?.sma?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.movingAverages?.sma?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.movingAverages?.sma?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.movingAverages?.sma?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "EMA",
-      type: "ma",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.movingAverages?.ema?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.movingAverages?.ema?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.movingAverages?.ema?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.movingAverages?.ema?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "WMA",
-      type: "ma",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.movingAverages?.wma?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.movingAverages?.wma?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.movingAverages?.wma?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.movingAverages?.wma?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "WEMA",
-      type: "ma",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.movingAverages?.wema?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.movingAverages?.wema?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.movingAverages?.wema?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.movingAverages?.wema?.at?.(-1)?.signal || "hold"
-    },
-    {
-      name: "TRIX",
-      type: "ma",
-      values: {
-        daily: analysis.find(a => a.period === 'day')?.movingAverages?.trix?.at?.(-1)?.value as number || 0,
-        weekly: analysis.find(a => a.period === 'week')?.movingAverages?.trix?.at?.(-1)?.value as number || 0,
-        monthly: analysis.find(a => a.period === 'month')?.movingAverages?.trix?.at?.(-1)?.value as number || 0,
-      },
-      signal: analysis.find(a => a.period === 'day')?.movingAverages?.trix?.at?.(-1)?.signal || "hold"
-    }
+    createIndicator("SMA", "ma", "movingAverages", "sma"),
+    createIndicator("EMA", "ma", "movingAverages", "ema"),
+    createIndicator("WMA", "ma", "movingAverages", "wma"),
+    createIndicator("WEMA", "ma", "movingAverages", "wema"),
+    createIndicator("TRIX", "ma", "movingAverages", "trix")
   ];
 
   return NextResponse.json([...oscillators, ...movingAverages]);

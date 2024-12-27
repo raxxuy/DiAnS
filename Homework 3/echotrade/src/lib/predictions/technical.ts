@@ -26,7 +26,7 @@ interface TechnicalIndicator {
   signal?: "buy" | "sell" | "hold";
 }
 
-interface AnalysisResult {
+export interface AnalysisResult {
   period: "day" | "week" | "month";
   movingAverages: {
     sma: TechnicalIndicator[];
@@ -45,12 +45,14 @@ interface AnalysisResult {
 }
 
 export function convertStockHistory(rawData: stockhistory[]): StockData[] {
-  return rawData.map(item => ({
-    date: new Date(item.date),
-    last_trade_price: parseFloat(item.last_trade_price),
-    max_price: parseFloat(item.max_price),
-    min_price: parseFloat(item.min_price)
-  }));
+  return rawData
+    .map(item => ({
+      date: new Date(item.date),
+      last_trade_price: parseFloat(item.last_trade_price.replace(/[.]/g, "")),
+      max_price: parseFloat(item.max_price.replace(/[.]/g, "")),
+      min_price: parseFloat(item.min_price.replace(/[.]/g, ""))
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
 function calculateMovingAverages(data: StockData[], period: number) {
@@ -240,5 +242,21 @@ export function analyzeTechnicalIndicators(rawData: stockhistory[]): AnalysisRes
     period: periodName as "day" | "week" | "month",
     movingAverages: calculateMovingAverages(data, period),
     oscillators: calculateOscillators(data, period),
+  })).map(result => ({
+    ...result,
+    movingAverages: {
+      sma: result.movingAverages.sma,
+      ema: result.movingAverages.ema,
+      wma: result.movingAverages.wma,
+      wema: result.movingAverages.wema,
+      trix: result.movingAverages.trix,
+    },
+    oscillators: {
+      rsi: result.oscillators.rsi,
+      macd: result.oscillators.macd,
+      stochastic: result.oscillators.stochastic,
+      cci: result.oscillators.cci,
+      williamsR: result.oscillators.williamsR,
+    }
   }));
 }
