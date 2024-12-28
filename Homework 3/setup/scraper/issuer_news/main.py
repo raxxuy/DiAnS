@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from multiprocessing import Pool
 import aiohttp
 import asyncio
@@ -22,20 +22,74 @@ def timer(func):
 
 
 @timer
-async def fetch_news(issuer):
-    url = f"https://www.mse.mk/en/symbol/{issuer}"
+async def fetch_issuers(db):
+    issuers = await db.get_issuers()
+
+    issuers_map = {}
+
+    for issuer_code, db_id in issuers:
+        url = f"https://www.mse.mk/en/symbol/{issuer_code}"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                response_text = await response.text()
+                soup = BeautifulSoup(response_text, "lxml", parse_only=SoupStrainer("div"))
+
+                link = soup.select_one("a[href^='https://seinet.com.mk/search/']")
+
+                if link is None:
+                    continue
+                
+                issuer_id = int(link.get("href").split("/")[-1])
+
+                issuers_map[issuer_code] = [issuer_id, db_id]
+
+    return issuers_map
+
+
+@timer
+async def get_last_available_news_date(db, issuer_id):
+    return await db.get_last_available_news_date(issuer_id)
+
+
+@timer
+async def fill_in_missing_data(db, issuer_id, db_id, last_date):
+    news_ids = await fetch_news(issuer_id, last_date)
+
+    for news_id in news_ids:
+        if await db.get_news_id(int(news_id)):
+            continue
+
+        if result := await fetch_article(news_id):
+            seinet_id, content, date, attachments = result
+            await db.add_issuer_news(db_id, seinet_id, content, date, attachments)
+
+
+@timer
+async def fetch_news(issuer_id, last_date):
+    if last_date is None:
+        last_date = datetime.now() - timedelta(days=365)
+
+    url = f"https://api.seinet.com.mk/public/documents"
+
+    params = {
+        "channelId": 1,
+        "dateFrom": last_date.strftime("%Y-%m-%dT%H:%M:%S"),
+        "dateTo": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "isPushRequest": "false",
+        "issuerId": issuer_id,
+        "languageId": 2,
+        "page": 1
+    }
     
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            response_text = await response.text()
-            soup = BeautifulSoup(response_text, "lxml", parse_only=SoupStrainer("main", {"id": "main"}))
+        async with session.post(url, json=params) as response:
+            json_data = (await response.json())["data"]
             
-            news_section = soup.select_one("#seiNetIssuerLatestNews")
-
-            if not news_section:
+            if not json_data:
                 return []
             
-            return [a.get("href").split("/")[-1] for a in news_section.select("a")]
+            return [item["documentId"] for item in json_data]
 
 
 async def fetch_article(news_id):
@@ -79,22 +133,14 @@ def fetch_attachment(attachment_id):
         return contents
 
 
-def sync_process_news(db_params, issuer):
+def sync_process_news(db_params, issuer_id, db_id):
     db = Database(**db_params)
 
     async def process_news():
-        await db.connect()
+        await db.connect()  
         
-        latest_news = await fetch_news(issuer)
-        issuer_id = await db.get_issuer_id(issuer)
-
-        for news_id in latest_news:
-            if await db.get_news_id(int(news_id)):
-                continue
-
-            if result := await fetch_article(news_id):
-                seinet_id, content, date, attachments = result
-                await db.add_issuer_news(issuer_id, seinet_id, content, date, attachments)
+        last_date = await get_last_available_news_date(db, issuer_id)
+        await fill_in_missing_data(db, issuer_id, db_id, last_date)
 
         await db.close()
 
@@ -109,12 +155,12 @@ async def main():
     await db.connect()
     await db.create_tables()
 
-    issuers = [issuer[0] for issuer in await db.get_issuers()]
+    issuers_map = await fetch_issuers(db)
 
     await db.close()
 
     with Pool(processes=12) as pool:
-        pool.starmap(sync_process_news, [(db_params, issuer) for issuer in issuers])
+        pool.starmap(sync_process_news, [(db_params, issuer_id, db_id) for issuer_id, db_id in issuers_map.values()])
 
 
 if __name__ == "__main__":

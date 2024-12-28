@@ -65,6 +65,14 @@ class Database:
 
         async with self.pool.acquire() as conn:
             return await conn.fetchval(query, seinet_id)
+        
+    async def get_last_available_news_date(self, issuer_id):
+        query = """
+            SELECT date FROM issuer_news WHERE issuer_id = $1 ORDER BY date DESC LIMIT 1
+        """
+
+        async with self.pool.acquire() as conn:
+            return await conn.fetchval(query, issuer_id)
 
     async def get_issuer_id(self, issuer_code):
         query = """
@@ -76,7 +84,7 @@ class Database:
 
     async def get_issuers(self):
         query = """
-            SELECT code FROM issuer
+            SELECT code, id FROM issuer
         """
 
         async with self.pool.acquire() as conn:
