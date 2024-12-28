@@ -23,11 +23,13 @@ model company {
 }
 
 model issuer {
-  id           Int            @id @default(autoincrement())
-  code         String         @unique @db.VarChar(20)
-  company_id   Int?
-  company      company?       @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  stockhistory stockhistory[]
+  id             Int              @id @default(autoincrement())
+  code           String           @unique @db.VarChar(20)
+  company_id     Int?
+  company        company?         @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  issuer_news    issuer_news[]
+  news_sentiment news_sentiment[]
+  stockhistory   stockhistory[]
 }
 
 model stockhistory {
@@ -54,4 +56,27 @@ model news {
   content String[]
 
   @@unique([title, date])
+}
+
+model issuer_news {
+  id             Int             @id @default(autoincrement())
+  seinet_id      Int
+  issuer_id      Int
+  content        String?
+  date           DateTime        @db.Date
+  attachments    String[]
+  issuer         issuer          @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  news_sentiment news_sentiment?
+
+  @@unique([issuer_id, id])
+}
+
+model news_sentiment {
+  id             Int         @id @default(autoincrement())
+  issuer_id      Int
+  issuer_news_id Int         @unique
+  sentiment      Float
+  created_at     DateTime    @default(now()) @db.Date
+  issuer         issuer      @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issuer_news    issuer_news @relation(fields: [issuer_news_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

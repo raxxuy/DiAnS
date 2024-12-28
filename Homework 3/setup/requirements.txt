@@ -1,0 +1,11 @@
+setuptools
+aiohttp
+aiolimiter
+asyncpg
+beautifulsoup4
+lxml
+torch
+torchvision
+textblob
+requests
+PyPDF2

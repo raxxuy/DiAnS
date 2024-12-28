@@ -1,9 +1,10 @@
 "use client";
 
-import TechnicalAnalysis from "@/components/technicalAnalysis";
 import { issuer } from "@prisma/client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
+import TechnicalAnalysis from "@/components/technicalAnalysis";
+import FundamentalAnalysis from "@/components/fundamentalAnalysis";
 
 function PredictionsContent() {
   const searchParams = useSearchParams();
@@ -52,10 +53,7 @@ function PredictionsContent() {
             <TechnicalAnalysis selectedIssuer={selectedIssuer} />
           </Suspense>
           <Suspense fallback={<div>Loading...</div>}>
-            <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
-              <h2 className="text-2xl font-bold mb-4">Fundamental Analysis</h2>
-              <p className="text-zinc-400">Coming soon</p>
-            </div>
+            <FundamentalAnalysis selectedIssuer={selectedIssuer} />
           </Suspense>
           {/* <Suspense fallback={<div>Loading...</div>}>
           <LSTMPrediction selectedIssuer={selectedIssuer} />

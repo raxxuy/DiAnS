@@ -19,7 +19,10 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!selectedIssuer) return;
+    if (!selectedIssuer) {
+      setTechnicalIndicators([]);
+      return;
+    }
 
     setIsLoading(true);
     fetch(`/api/predictions/technical?issuer_id=${selectedIssuer.id}`)
