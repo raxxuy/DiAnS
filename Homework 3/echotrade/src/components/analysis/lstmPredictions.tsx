@@ -1,31 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LSTM, LSTMPrediction } from "@/lib/predictions/lstm";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartOptions
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { LSTMPrediction } from "@/lib/predictions/lstm";
 import { issuer } from "@prisma/client";
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import LSTMChart from "./lstmChart";
 
 export default function LSTMPredictions({ selectedIssuer }: { selectedIssuer?: issuer }) {
   const [predictions, setPredictions] = useState<LSTMPrediction[]>([]);
@@ -43,53 +21,6 @@ export default function LSTMPredictions({ selectedIssuer }: { selectedIssuer?: i
       .catch(error => console.error(error))
       .finally(() => setIsLoading(false));
   }, [selectedIssuer]);
-
-  const chartData = {
-    labels: predictions.map(p => new Date(p.prediction_date).toLocaleDateString()),
-    datasets: [
-      {
-        label: 'Predicted Price',
-        data: predictions.map(p => p.predicted_price),
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
-        fill: false
-      }
-    ]
-  };
-
-  const options: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
-            if (context.parsed.y !== null) {
-              label += `${context.parsed.y.toLocaleString()}`;
-            }
-            return label;
-          }
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: false,
-        ticks: {
-          callback: function (value) {
-            return `${value.toLocaleString()}`;
-          }
-        }
-      }
-    }
-  };
 
   if (!selectedIssuer) {
     return (
@@ -117,12 +48,12 @@ export default function LSTMPredictions({ selectedIssuer }: { selectedIssuer?: i
       <h2 className="text-2xl font-bold mb-4">LSTM Price Predictions</h2>
       {predictions.length > 0 ? (
         <div className="w-full h-[400px]">
-          <div className="h-full">
-            <Line data={chartData} options={options} />
-          </div>
+          <LSTMChart predictions={predictions} />
         </div>
       ) : (
-        <p className="text-zinc-400">Not enough historical data to generate predictions. The issuer must have at least 10 days of historical data.</p>
+        <p className="text-zinc-400">
+          Not enough historical data to generate predictions. The issuer must have at least 10 days of historical data.
+        </p>
       )}
     </div>
   );

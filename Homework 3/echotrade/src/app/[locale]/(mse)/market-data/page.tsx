@@ -3,19 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { issuer, stockhistory } from "@prisma/client";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
-import ExportButtons from '@/components/exportButtons';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import ExportButtons from "@/components/exportButtons";
+import StockChart from "@/components/stockChart";
 
 function MarketDataContent() {
   const searchParams = useSearchParams();
@@ -51,35 +40,6 @@ function MarketDataContent() {
     }
   }, [selectedIssuer, fromDate, toDate]);
 
-  const chartData = {
-    labels: stockHistory.map(h => new Date(h.date).toLocaleDateString()),
-    datasets: [{
-      label: "Last Trade Price",
-      data: stockHistory.map(h => parseFloat(h.last_trade_price.replace(/[.]/g, ""))),
-      borderColor: 'rgb(75, 192, 192)',
-      tension: 0.3,
-      fill: false
-    }]
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false
-      }
-    },
-    scales: {
-      x: {
-        ticks: {
-          maxRotation: 0,
-          minRotation: 0
-        }
-      }
-    }
-  };
-
   const renderTable = () => (
     <div className="market-data-table">
       <table className="w-full border-collapse">
@@ -99,7 +59,7 @@ function MarketDataContent() {
         <tbody>
           {stockHistory.length === 0 ? (
             <tr>
-              <td colSpan={8} className="market-data-td text-center text-zinc-400">
+              <td colSpan={9} className="market-data-td text-center text-zinc-400">
                 No data available for this period
               </td>
             </tr>
@@ -126,9 +86,7 @@ function MarketDataContent() {
   );
 
   const renderChart = () => (
-    <div className="market-data-chart">
-      <Line data={chartData} options={chartOptions} />
-    </div>
+    <StockChart stockHistory={stockHistory} />
   );
 
   return (
