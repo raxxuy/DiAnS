@@ -69,3 +69,11 @@ class Database:
 
         async with self.pool.acquire() as conn:
             await conn.execute(query, shared_id, title, date, content)
+
+    async def get_news(self, title, date, content):
+        query = """
+            SELECT * FROM News WHERE title = $1 AND date = $2 AND content = $3
+        """
+
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(query, title, date, content)

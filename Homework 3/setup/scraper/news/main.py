@@ -68,6 +68,11 @@ async def add_missing_news(db, news, news_mk):
     title_mk, date_mk, content_mk = news_mk
 
     parsed_date = datetime.strptime(date, "%A, %B %d, %Y").date()
+
+    existing_news = await db.get_news(title, parsed_date, content)
+    if existing_news:
+        return
+
     shared_id = await db.add_news(title, parsed_date, content, "en")
 
     parsed_date_mk = parse_macedonian_date(date_mk)
