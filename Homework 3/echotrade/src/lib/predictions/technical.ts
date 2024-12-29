@@ -16,9 +16,9 @@ import { MACDOutput } from "technicalindicators/declarations/moving_averages/MAC
 
 interface StockData {
   date: Date;
-  last_trade_price: number;
   max_price: number;
   min_price: number;
+  avg_price: number;
 }
 
 interface TechnicalIndicator {
@@ -49,15 +49,15 @@ export function convertStockHistory(rawData: stockhistory[]): StockData[] {
   return rawData
     .map(item => ({
       date: new Date(item.date),
-      last_trade_price: parseFloat(item.last_trade_price.replace(/[.]/g, "")),
       max_price: parseFloat(item.max_price.replace(/[.]/g, "")),
-      min_price: parseFloat(item.min_price.replace(/[.]/g, ""))
+      min_price: parseFloat(item.min_price.replace(/[.]/g, "")),
+      avg_price: parseFloat(item.avg_price.replace(/[.]/g, ""))
     }))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
 function calculateMovingAverages(data: StockData[], period: number) {
-  const prices = data.map(d => d.last_trade_price);
+  const prices = data.map(d => d.avg_price);
   const dates = data.map(d => d.date);
 
   const smaValues = SMA.calculate({ period, values: prices });
@@ -100,7 +100,7 @@ function calculateMovingAverages(data: StockData[], period: number) {
 }
 
 function calculateOscillators(data: StockData[], period: number) {
-  const prices = data.map(d => d.last_trade_price);
+  const prices = data.map(d => d.avg_price);
   const high = data.map(d => d.max_price);
   const low = data.map(d => d.min_price);
   const dates = data.map(d => d.date);

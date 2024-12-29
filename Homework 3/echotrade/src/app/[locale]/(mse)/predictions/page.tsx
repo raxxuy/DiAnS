@@ -3,8 +3,9 @@
 import { issuer } from "@prisma/client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import TechnicalAnalysis from "@/components/technicalAnalysis";
-import FundamentalAnalysis from "@/components/fundamentalAnalysis";
+import TechnicalAnalysis from "@/components/analysis/technicalAnalysis";
+import FundamentalAnalysis from "@/components/analysis/fundamentalAnalysis";
+import LSTMPredictions from "@/components/analysis/lstmPredictions";
 
 function PredictionsContent() {
   const searchParams = useSearchParams();
@@ -55,9 +56,9 @@ function PredictionsContent() {
           <Suspense fallback={<div>Loading...</div>}>
             <FundamentalAnalysis selectedIssuer={selectedIssuer} />
           </Suspense>
-          {/* <Suspense fallback={<div>Loading...</div>}>
-          <LSTMPrediction selectedIssuer={selectedIssuer} />
-        </Suspense> */}
+          <Suspense fallback={<div>Loading...</div>}>
+            <LSTMPredictions selectedIssuer={selectedIssuer} />
+          </Suspense>
         </div>
       </div>
     </div>

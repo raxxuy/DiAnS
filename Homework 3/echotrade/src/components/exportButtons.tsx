@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { stockhistory } from '@prisma/client';
+import autoTable from "jspdf-autotable";
 
 export default function ExportButtons({ 
   stockHistory, 
@@ -19,12 +20,13 @@ export default function ExportButtons({
     if (stockHistory.length === 0) return;
     
     const csvContent = [
-      ['Date', 'Last Trade Price', 'Max Price', 'Min Price', 'Change', 'Volume', 'Turnover Best', 'Total Turnover'],
+      ['Date', 'Last Trade Price', 'Max Price', 'Min Price', 'Avg Price', 'Change', 'Volume', 'Turnover Best', 'Total Turnover'],
       ...stockHistory.map(h => [
         new Date(h.date).toLocaleDateString(),
         h.last_trade_price,
         h.max_price,
         h.min_price,
+        h.avg_price,
         h.percent_change,
         h.volume,
         h.turnover_best,
@@ -42,12 +44,13 @@ export default function ExportButtons({
     if (stockHistory.length === 0) return;
     
     const wsData = [
-      ['Date', 'Last Trade Price', 'Max Price', 'Min Price', 'Change', 'Volume', 'Turnover Best', 'Total Turnover'],
+      ['Date', 'Last Trade Price', 'Max Price', 'Min Price', 'Avg Price', 'Change', 'Volume', 'Turnover Best', 'Total Turnover'],
       ...stockHistory.map(h => [
         new Date(h.date).toLocaleDateString(),
         h.last_trade_price,
         h.max_price,
         h.min_price,
+        h.avg_price,
         h.percent_change,
         h.volume,
         h.turnover_best,
@@ -74,17 +77,18 @@ export default function ExportButtons({
       h.last_trade_price,
       h.max_price,
       h.min_price,
+      h.avg_price,
       h.percent_change,
       h.volume,
       h.turnover_best,
       h.total_turnover
     ]);
 
-    (doc as any).autoTable({
-      head: [['Date', 'Last Trade Price', 'Max Price', 'Min Price', 'Change', 'Volume', 'Turnover Best', 'Total Turnover']],
+    autoTable(doc, {
+      head: [['Date', 'Last Trade Price', 'Max Price', 'Min Price', 'Avg Price', 'Change', 'Volume', 'Turnover Best', 'Total Turnover']],
       body: tableData,
       startY: 35,
-    });
+    })
 
     doc.save(`${code}_market_data.pdf`);
   };

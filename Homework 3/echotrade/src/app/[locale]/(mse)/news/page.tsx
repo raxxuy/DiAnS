@@ -4,8 +4,12 @@ import { useState, useEffect } from "react";
 import { news } from "@prisma/client";
 import Link from "next/link";
 import SearchBar from "@/components/searchBar";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function News() {
+  const t = useTranslations("News");
+  const locale = useLocale();
+  
   const [news, setNews] = useState<news[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -16,13 +20,13 @@ export default function News() {
   );
 
   useEffect(() => {
-    fetch("/api/news")
+    fetch(`/api/news?locale=${locale}`)
       .then(res => res.json())
       .then(data => {
         setNews(data.sort((a: news, b: news) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         setIsLoading(false);
       });
-  }, []);
+  }, [locale]);
 
   const currentNews = filteredNews.slice(
     (currentPage - 1) * itemsPerPage,
@@ -38,13 +42,13 @@ export default function News() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
             <div>
               <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-                Latest Market News
+                {t("title")}
               </h1>
               <p className="text-zinc-400 mt-2">
-                Stay updated with the latest news from the Macedonian Stock Exchange
+                {t("description")}
               </p>
             </div>
-            <SearchBar setSearch={setSearch} placeholder="Search news..." />
+            <SearchBar setSearch={setSearch} placeholder={t("placeholder")} />
           </div>
 
           <div className="grid grid-cols-1 gap-4">
@@ -66,21 +70,20 @@ export default function News() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
           <div>
             <h1 className="news-header">
-              Latest Market News
+              {t("title")}
             </h1>
             <p className="news-subheader">
-              Stay updated with the latest news from the Macedonian Stock Exchange
+              {t("description")}
             </p>
           </div>
-          <SearchBar setSearch={setSearch} placeholder="Search news..." />
+          <SearchBar setSearch={setSearch} placeholder={t("placeholder")} />
         </div>
         
         <div className="flex flex-col gap-4">
           {currentNews.map(n => (
             <Link 
-              href={`/news/${n.id}`} 
+              href={`/${locale}/news/${n.shared_id}`} 
               key={n.id} 
-              prefetch={true}
               className="group news-card"
             >
               <div className="flex flex-col gap-2">
@@ -92,7 +95,7 @@ export default function News() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  {new Date(n.date).toLocaleDateString('en-US', {
+                  {new Date(n.date).toLocaleDateString(locale === "en" ? "en-US" : "mk-MK", {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
@@ -112,17 +115,17 @@ export default function News() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Previous
+            {t("pagination.previous")}
           </button>
           <span className="news-pagination-current">
-            Page {currentPage} of {totalPages}
+            {t("pagination.current", { currentPage, totalPages })}
           </span>
           <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage >= totalPages}
             className="news-pagination-button"
           >
-            Next
+            {t("pagination.next")}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>

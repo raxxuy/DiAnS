@@ -1,15 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import LanguageSelector from "./languageSelector";
+import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 
 export default function NavBar() {
+  const locale = useLocale();
+  const t = useTranslations("NavBar");
+  
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/market-data", label: "Market Data" },
-    { href: "/issuers", label: "Issuers" },
-    { href: "/predictions", label: "Predictions" },
-    { href: "/news", label: "News" },
-    { href: "/about", label: "About" }
+    { href: `/${locale}`, label: t("home") },
+    { href: `/${locale}/market-data`, label: t("marketData") },
+    { href: `/${locale}/issuers`, label: t("issuers") },
+    { href: `/${locale}/predictions`, label: t("predictions") },
+    { href: `/${locale}/news`, label: t("news") },
+    { href: `/${locale}/about`, label: t("about") }
   ];
 
   return (

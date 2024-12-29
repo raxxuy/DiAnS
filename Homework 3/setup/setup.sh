@@ -12,7 +12,7 @@ sleep 10
 
 # Create and activate virtual environment
 echo "Setting up Python virtual environment..."
-python -m venv venv
+python3.12 -m venv venv
 
 # Activate virtual environment
 echo "Activating virtual environment..."
@@ -35,5 +35,12 @@ python scraper/issuer_news/main.py
 
 echo "Running sentiment analysis..."
 python analysis/sentiment.py
+
+# Run analysis
+echo "Running sentiment analysis..."
+python analysis/sentiment.py
+
+echo "Running LSTM predictions..."
+python analysis/lstm.py
 
 echo "Setup complete!"

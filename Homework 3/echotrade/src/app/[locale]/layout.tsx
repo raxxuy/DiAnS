@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Montserrat, Raleway, Roboto } from "next/font/google";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import "../globals.css";
 import NavBar from "@/components/navBar";
-import "./globals.css";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,23 +37,32 @@ const raleway = Raleway({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "EchoTrade - Macedonian Stock Exchange Insights",
-  description: "Gain real-time insights and predictive analytics for the Macedonian Stock Exchange",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{
+    locale: string;
+  }>
 }>) {
+  const locale = (await params).locale;
+
+  if (!routing.locales.includes(locale as "en" | "mk")) {
+    notFound();
+  }
+
+  const messages = await getMessages({ locale });
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} ${montserrat.variable} ${raleway.variable} antialiased`}
       >
-        <NavBar />
-        {children}
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <NavBar />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -89,6 +89,7 @@ function MarketDataContent() {
             <th>Last Trade Price</th>
             <th>Max Price</th>
             <th>Min Price</th>
+            <th>Avg Price</th>
             <th>Change</th>
             <th>Volume</th>
             <th>Turnover Best</th>
@@ -109,6 +110,7 @@ function MarketDataContent() {
                 <td>{h.last_trade_price}</td>
                 <td>{h.max_price}</td>
                 <td>{h.min_price}</td>
+                <td>{h.avg_price}</td>
                 <td className={`${parseFloat(h.percent_change.replace(",", ".")) > 0 ? 'text-emerald-400' : parseFloat(h.percent_change.replace(",", ".")) < 0 ? 'text-red-400' : ''}`}>
                   {`${h.percent_change}%`}
                 </td>

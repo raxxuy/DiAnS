@@ -1,5 +1,6 @@
 import asyncpg
 from asyncpg.pool import Pool
+from datetime import datetime, timedelta
 
 
 class Database:
@@ -37,6 +38,17 @@ class Database:
                 FOREIGN KEY (issuer_news_id) REFERENCES issuer_news(id),
                 FOREIGN KEY (issuer_id) REFERENCES issuer(id)
             );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS lstm_predictions (
+                id SERIAL PRIMARY KEY,
+                issuer_id INT NOT NULL,
+                prediction_date DATE NOT NULL,
+                predicted_price FLOAT NOT NULL,
+                created_at DATE NOT NULL DEFAULT NOW(),
+                FOREIGN KEY (issuer_id) REFERENCES issuer(id),
+                UNIQUE (issuer_id, prediction_date)
+            );
             """
         ]
 
@@ -72,3 +84,47 @@ class Database:
 
         async with self.pool.acquire() as conn:
             await conn.execute(query, issuer_id, issuer_news_id, sentiment)
+
+    async def save_lstm_predictions(self, issuer_id, predictions, start_date):
+        query = """
+            INSERT INTO lstm_predictions (issuer_id, prediction_date, predicted_price)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (issuer_id, prediction_date) 
+            DO UPDATE SET predicted_price = EXCLUDED.predicted_price
+        """
+        
+        async with self.pool.acquire() as conn:
+            for i, pred in enumerate(predictions):
+                pred_date = start_date + timedelta(days=i)
+                await conn.execute(query, issuer_id, pred_date, pred)
+
+    async def get_lstm_predictions(self, issuer_id):
+        query = """
+            SELECT prediction_date, predicted_price 
+            FROM lstm_predictions 
+            WHERE issuer_id = $1 
+            ORDER BY prediction_date
+        """
+        
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(query, issuer_id)
+        
+    async def get_issuers(self):
+        query = """
+            SELECT code, id FROM issuer
+        """
+
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(query)
+
+    async def get_stock_history(self, issuer_id):
+        query = """
+            SELECT avg_price, date 
+            FROM stockhistory 
+            WHERE issuer_id = $1 
+            AND date >= CURRENT_DATE - INTERVAL '365 days'
+            ORDER BY date DESC
+        """
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(query, issuer_id)
+

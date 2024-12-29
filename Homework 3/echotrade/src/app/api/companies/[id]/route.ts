@@ -1,11 +1,12 @@
 import { getCompanyById } from "@/lib/db/actions/companies";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const id = parseInt((await params).id);
-  const company = await getCompanyById(id);
+  const locale = request.nextUrl.searchParams.get("locale") || "en";
+  const company = await getCompanyById(id, locale);
   return NextResponse.json(company);
 }

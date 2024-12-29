@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from 'next-intl';
+import { usePathname, useRouter } from "@/i18n/routing";
 
 const languages = [
   { code: "en", label: "English" },
@@ -9,10 +11,11 @@ const languages = [
 
 export default function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState("en");
-
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const handleLanguageChange = (langCode: string) => {
-    setSelectedLang(langCode);
+    router.replace(pathname, { locale: langCode });
     setIsOpen(false);
   };
 
@@ -28,7 +31,7 @@ export default function LanguageSelector() {
         `}
       >
         <span className={`text-sm font-medium bg-gradient-to-r bg-clip-text text-transparent ${isOpen ? "from-[#7779ff] via-[#bf65fb] to-[#f75bff]" : "from-zinc-400 via-zinc-400 to-zinc-400"} transition-colors duration-300`}>
-          {languages.find(lang => lang.code === selectedLang)?.label}
+          {languages.find(lang => lang.code === locale)?.label}
         </span>
         
         <svg 
@@ -54,13 +57,13 @@ export default function LanguageSelector() {
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
               className={`w-full px-4 py-2 text-left text-sm transition-all duration-200 ${
-                selectedLang === lang.code 
+                locale === lang.code 
                   ? "bg-[#bf65fb]/10 bg-clip-text text-[#bf65fb]"
                   : "text-zinc-400 hover:text-zinc-300 hover:bg-zinc-700/50"
               } flex items-center justify-between`}
             >
               {lang.label}
-              {selectedLang === lang.code && (
+              {locale === lang.code && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 text-[#bf65fb]"

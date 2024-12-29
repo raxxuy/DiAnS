@@ -1,52 +1,56 @@
 import Link from "next/link";
-
-const features = [
-  {
-    title: "Real-time Analytics",
-    description: "Get instant market insights with live data visualization and performance metrics",
-    icon: "📊",
-    gradient: "from-blue-500 to-cyan-500",
-    href: "/market-data",
-    shadow: "hover:shadow-blue-500/25"
-  },
-  {
-    title: "Predictive AI",
-    description: "Advanced machine learning algorithms to forecast market trends with precision",
-    icon: "🤖",
-    gradient: "from-purple-500 to-pink-500",
-    href: "/predictions",
-    shadow: "hover:shadow-purple-500/25"
-  },
-  {
-    title: "Market Pulse",
-    description: "Stay ahead with real-time news alerts and market sentiment analysis",
-    icon: "⚡",
-    gradient: "from-amber-500 to-orange-500",
-    href: "/news",
-    shadow: "hover:shadow-amber-500/25"
-  }
-];
-
-const links = [
-  {
-    title: "About",
-    href: "/about"
-  },
-  {
-    title: "Market Data",
-    href: "/market-data"
-  },
-  {
-    title: "Predictions", 
-    href: "/predictions"
-  },
-  {
-    title: "News",
-    href: "/news"
-  }
-]
+import { useLocale, useTranslations } from "next-intl";
 
 export default function Home() {
+  const t = useTranslations("Home");
+  const locale = useLocale();
+
+  const features = [
+    {
+      title: t("features.card1"),
+      description: t("features.card1Description"),
+      icon: "📊",
+      gradient: "from-blue-500 to-cyan-500",
+      href: `/${locale}/market-data`,
+      shadow: "hover:shadow-blue-500/25"
+    },
+    {
+      title: t("features.card2"),
+      description: t("features.card2Description"),
+      icon: "🤖",
+      gradient: "from-purple-500 to-pink-500",
+      href: `/${locale}/predictions`,
+      shadow: "hover:shadow-purple-500/25"
+    },
+    {
+      title: t("features.card3"),
+      description: t("features.card3Description"),
+      icon: "⚡",
+      gradient: "from-amber-500 to-orange-500",
+      href: `/${locale}/news`,
+      shadow: "hover:shadow-amber-500/25"
+    }
+  ];
+
+  const links = [
+    {
+      title: t("footer.about"),
+      href: `/${locale}/about`
+    },
+    {
+      title: t("footer.marketData"),
+      href: `/${locale}/market-data`
+    },
+    {
+      title: t("footer.predictions"),
+      href: `/${locale}/predictions`
+    },
+    {
+      title: t("footer.news"),
+      href: `/${locale}/news`
+    }
+  ]
+
   return (
     <div className="w-full min-h-screen font-[family-name:var(--font-roboto)] bg-zinc-900">
       <main>
@@ -108,20 +112,19 @@ export default function Home() {
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#7779ff] via-[#bf65fb] to-[#f350fd] transition-all">EchoTrade</span>
               </h1>
               <p className="text-zinc-300 text-lg md:text-xl leading-relaxed backdrop-blur-sm">
-                Gain real-time insights and predictive analytics for
-                the <span className="font-bold text-2xl">Macedonian Stock Exchange</span>,
-                enabling you to monitor market trends, evaluate stock performance,
-                and make informed, data-driven investment decisions.
+                {t("main.description1")}
+                <span className="font-bold text-2xl">{t("main.span")}</span>,
+                {t("main.description2")}
               </p>
               <div className="flex gap-4 mt-4">
-                <Link href="/market-data">
+                <Link href={`/${locale}/market-data`}>
                   <button className="primary-button">
-                    Get Started
+                    {t("main.getStarted")}
                   </button>
                 </Link>
-                <Link href="/about">
+                <Link href={`/${locale}/about`}>
                   <button className="secondary-button">
-                    Learn More
+                    {t("main.learnMore")}
                   </button>
                 </Link>
               </div>
@@ -133,7 +136,7 @@ export default function Home() {
       <section className="px-8 md:px-20 py-24 md:py-36 bg-zinc-800/50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-            Powerful Features for Smart Trading
+            {t("features.title")}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -175,7 +178,7 @@ export default function Home() {
 
       <footer className="w-full py-8 bg-zinc-900/80 backdrop-blur-md border-t border-zinc-800">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-zinc-400">© 2024 EchoTrade. All rights reserved.</div>
+          <div className="text-zinc-400">{t("footer.copyright")}</div>
           <div className="flex gap-6">
             {links.map((link, index) => (
               <Link

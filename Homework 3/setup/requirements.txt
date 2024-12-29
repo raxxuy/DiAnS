@@ -7,3 +7,6 @@ lxml
 textblob
 requests
 PyPDF2
+tensorflow-cpu
+scikit-learn
+numpy

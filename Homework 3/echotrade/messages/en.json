@@ -1,0 +1,83 @@
+{
+  "Home": {
+    "main": {
+      "span": "Macedonian Stock Exchange",
+      "description1": "Gain real-time insights and predictive analytics for the ",
+      "description2": " enabling you to monitor market trends, evaluate stock performance, and make informed, data-driven investment decisions.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More"
+    },
+    "footer": {
+      "copyright": "Copyright © 2024 EchoTrade. All rights reserved.",
+      "home": "Home",
+      "about": "About",
+      "marketData": "Market Data",
+      "predictions": "Predictions",
+      "news": "News"
+    },
+    "features": {
+      "title": "Powerful Features for Smart Trading",
+      "card1": "Real-time Analytics",
+      "card2": "Predictive AI",
+      "card3": "Market Pulse",
+      "card1Description": "Get instant market insights with live data visualization and performance metrics",
+      "card2Description": "Advanced machine learning algorithms to forecast market trends with precision",
+      "card3Description": "Stay ahead with real-time news alerts and market sentiment analysis",
+      "learnMore": "Learn More"
+    }
+  },
+  "Issuers": {
+    "title": "Issuers",
+    "description": "Browse and analyze stock issuers on the Macedonian Stock Exchange",
+    "placeholder": "Search issuers...",
+    "card": {
+      "details": "View Details",
+      "analysis": "Analysis"
+    }
+  },
+  "Issuer": {
+    "description": "Company Details and Information",
+    "company": {
+      "information": {
+        "title": "Company Information",
+        "name": "Company Name",
+        "address": "Address",
+        "website": "Website"
+      },
+      "contact": {
+        "title": "Contact Details",
+        "person": "Contact Person",
+        "email": "Email",
+        "phone": "Phone Numbers"
+      }
+    },
+    "links": {
+      "marketData": "Market Data",
+      "predictions": "Predictions"
+    }
+  },
+  "News": {
+    "title": "Latest Market News",
+    "description": "Stay updated with the latest news from the Macedonian Stock Exchange",
+    "placeholder": "Search news...",
+    "pagination": {
+      "previous": "Previous",
+      "current": "Page {currentPage} of {totalPages}",
+      "of": "of",
+      "next": "Next"
+    }
+  },
+  "NavBar": {
+    "home": "Home",
+    "marketData": "Market Data",
+    "issuers": "Issuers",
+    "predictions": "Predictions",
+    "news": "News",
+    "about": "About"
+  },
+  "SearchBar": {
+    "placeholder": "Search issuers...",
+    "tip1": "Press ",
+    "tip2": "to search"
+  }
+}

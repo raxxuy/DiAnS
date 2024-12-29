@@ -1,12 +1,14 @@
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 export default function SearchBar({
   setSearch,
-  placeholder = "Search issuers..."
+  placeholder = ""
 }: {
   setSearch: (search: string) => void;
   placeholder?: string;
 }) {
+  const t = useTranslations("SearchBar");
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function SearchBar({
         </svg>
         <input
           type="text"
-          placeholder={placeholder}
+          placeholder={placeholder || t("placeholder")}
           className="
             w-full bg-transparent text-white placeholder-zinc-400
             focus:outline-none
@@ -73,7 +75,7 @@ export default function SearchBar({
       {!isFocused && (
         <div className="mt-2 ml-4">
           <span className="text-xs text-zinc-500">
-            Press <kbd className="px-2 py-0.5 text-xs rounded-md bg-zinc-800/80 text-zinc-400 border border-zinc-700/50">/</kbd> to search
+            {t("tip1")} <kbd className="px-2 py-0.5 text-xs rounded-md bg-zinc-800/80 text-zinc-400 border border-zinc-700/50">/</kbd> {t("tip2")}
           </span>
         </div>
       )}

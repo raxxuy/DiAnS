@@ -4,8 +4,12 @@ import Link from "next/link";
 import { issuer, company } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function Issuer() {
+  const t = useTranslations("Issuer");
+  const locale = useLocale();
+
   const { code } = useParams();
   const [issuer, setIssuer] = useState<issuer>();
   const [company, setCompany] = useState<company>();
@@ -17,7 +21,7 @@ export default function Issuer() {
       .then(data => {
         setIssuer(data);
         if (data) {
-          fetch(`/api/companies/${data.company_id}`)
+          fetch(`/api/companies/${data.company_id}?locale=${locale}`)
             .then(res => res.json())
             .then(companyData => {
               setCompany(companyData);
@@ -27,7 +31,7 @@ export default function Issuer() {
           setIsLoading(false);
         }
       });
-  }, [code]);
+  }, [code, locale]);
 
   if (isLoading) {
     return (
@@ -114,20 +118,22 @@ export default function Issuer() {
               <h1 className="issuer-detail-header">
                 {issuer.code}
               </h1>
-              <p className="text-zinc-400 mt-2">Company Details and Information</p>
+              <p className="text-zinc-400 mt-2">
+                {t("description")}
+              </p>
             </div>
             <div className="flex gap-3">
               <Link
-                href={`/market-data?code=${issuer.code}`}
+                href={`/${locale}/market-data?code=${issuer.code}`}
                 className="issuer-detail-button"
               >
-                Market Data
+                {t("links.marketData")}
               </Link>
               <Link
-                href={`/predictions?code=${issuer.code}`}
+                href={`/${locale}/predictions?code=${issuer.code}`}
                 className="issuer-detail-button"
               >
-                Predictions
+                {t("links.predictions")}
               </Link>
             </div>
           </div>
@@ -135,22 +141,22 @@ export default function Issuer() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="issuer-detail-card">
               <h2 className="issuer-detail-title">
-                Company Information
+                {t("company.information.title")}
               </h2>
               <div className="issuer-detail-field">
                 <div>
-                  <span className="issuer-detail-label">Company Name</span>
+                  <span className="issuer-detail-label">{t("company.information.name")}</span>
                   <p className="issuer-detail-value">{company.name}</p>
                 </div>
                 {company.address && (
                   <div>
-                    <span className="issuer-detail-label">Address</span>
+                    <span className="issuer-detail-label">{t("company.information.address")}</span>
                     <p className="issuer-detail-value">{company.address}</p>
                   </div>
                 )}
                 {company.website && (
                   <div>
-                    <span className="issuer-detail-label">Website</span>
+                    <span className="issuer-detail-label">{t("company.information.website")}</span>
                     <p>
                       <Link
                         href={company.website}
@@ -167,24 +173,24 @@ export default function Issuer() {
 
             <div className="issuer-detail-card">
               <h2 className="issuer-detail-title">
-                Contact Details
+                {t("company.contact.title")}
               </h2>
               <div className="issuer-detail-field">
                 {company.contact_person && (
                   <div>
-                    <span className="issuer-detail-label">Contact Person</span>
+                    <span className="issuer-detail-label">{t("company.contact.person")}</span>
                     <p className="issuer-detail-value">{company.contact_person}</p>
                   </div>
                 )}
                 {company.email && (
                   <div>
-                    <span className="issuer-detail-label">Email</span>
+                    <span className="issuer-detail-label">{t("company.contact.email")}</span>
                     <p className="issuer-detail-value">{company.email}</p>
                   </div>
                 )}
                 {company.phones.length > 0 && (
                   <div>
-                    <span className="issuer-detail-label">Phone Numbers</span>
+                    <span className="issuer-detail-label">{t("company.contact.phone")}</span>
                     <p className="issuer-detail-value">{company.phones.join(", ")}</p>
                   </div>
                 )}

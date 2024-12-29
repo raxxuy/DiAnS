@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing issuer_id" }, { status: 400 });
   }
 
-  const stockHistory = await getStockHistoryByIssuerId(parseInt(issuer_id));
+  const stockHistory = (await getStockHistoryByIssuerId(parseInt(issuer_id))).filter(item => item.date > new Date(new Date().setFullYear(new Date().getFullYear() - 1)));  
 
   if (!stockHistory || stockHistory.length < 14) {
     return NextResponse.json({

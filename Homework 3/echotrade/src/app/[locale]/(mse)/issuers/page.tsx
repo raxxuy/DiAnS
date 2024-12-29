@@ -4,8 +4,12 @@ import SearchBar from "@/components/searchBar";
 import { useEffect, useState } from "react";
 import { company, issuer } from "@prisma/client";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function Issuers() {
+  const t = useTranslations("Issuers");
+  const locale = useLocale();
+
   const [companies, setCompanies] = useState<company[]>([]);
   const [issuers, setIssuers] = useState<issuer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,18 +19,18 @@ export default function Issuers() {
   );
 
   useEffect(() => {
-    fetch("/api/issuers")
+    fetch(`/api/issuers`)
       .then(res => res.json())
       .then(data => {
         setIssuers(data.sort((a: issuer, b: issuer) => a.code.localeCompare(b.code)));
-        fetch("/api/companies")
+        fetch(`/api/companies?locale=${locale}`)
           .then(res => res.json())
           .then(companyData => {
             setCompanies(companyData);
             setIsLoading(false);
           });
       });
-  }, []);
+  }, [locale]);
 
   if (isLoading) {
     return (
@@ -35,10 +39,10 @@ export default function Issuers() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
             <div>
               <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-                Issuers
+                {t("title")}
               </h1>
               <p className="text-zinc-400 mt-2">
-                Browse and analyze stock issuers on the Macedonian Stock Exchange
+                {t("description")}
               </p>
             </div>
             <SearchBar setSearch={setSearch} />
@@ -60,25 +64,25 @@ export default function Issuers() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
           <div>
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-              Issuers
+              {t("title")}
             </h1>
             <p className="text-zinc-400 mt-2">
-              Browse and analyze stock issuers on the Macedonian Stock Exchange
+              {t("description")}
             </p>
           </div>
-          <SearchBar setSearch={setSearch} />
+          <SearchBar setSearch={setSearch}/>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredIssuers.length === 0 ? (
             <div className="col-span-full text-center py-12 text-zinc-400">
-              No issuers found matching your search criteria
+              {t("noIssuersFound")}
             </div>
           ) : (
             filteredIssuers.map(issuer => (
               <Link
                 key={issuer.id}
-                href={`/issuers/${issuer.code}`}
+                href={`/${locale}/issuers/${issuer.code}`}
                 prefetch={true}
                 className="group issuer-card"
               >
@@ -108,8 +112,8 @@ export default function Issuers() {
                   </div>
                 </div>
                 <div className="mt-4 flex gap-3">
-                  <span className="issuer-tag">View Details</span>
-                  <span className="issuer-tag">Analysis</span>
+                  <span className="issuer-tag">{t("card.details")}</span>
+                  <span className="issuer-tag">{t("card.analysis")}</span>
                 </div>
               </Link>
             ))

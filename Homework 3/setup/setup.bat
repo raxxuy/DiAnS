@@ -37,4 +37,11 @@ python scraper\issuer_news\main.py
 echo Running sentiment analysis...
 python analysis\sentiment.py
 
+::Run analysis
+echo Running sentiment analysis...
+python analysis\sentiment.py
+
+echo Running LSTM predictions...
+python analysis\lstm.py
+
 echo Setup complete!
