@@ -30,10 +30,12 @@ class Database:
             """
             CREATE TABLE IF NOT EXISTS News (
                 id SERIAL PRIMARY KEY,
+                shared_id INTEGER NOT NULL,
+                locale VARCHAR(2) NOT NULL,
                 title VARCHAR(255) NOT NULL,
                 date DATE NOT NULL,
                 content TEXT[] NOT NULL,
-                UNIQUE(title, date)
+                UNIQUE(shared_id, locale)
             );
             """
         ]
@@ -42,12 +44,28 @@ class Database:
             for query in queries:
                 await conn.execute(query)
 
-    async def add_news(self, title, date, content):
+    async def add_news(self, title, date, content, locale):
         query = """
-            INSERT INTO News (title, date, content)
-            VALUES ($1, $2, $3)
-            ON CONFLICT (title, date) DO NOTHING
+            WITH inserted AS (
+                INSERT INTO News (shared_id, title, date, content, locale)
+                VALUES (COALESCE((SELECT MAX(id) FROM News), 0) + 1, $1, $2, $3, $4)
+                ON CONFLICT (shared_id, locale) DO UPDATE SET
+                    date = EXCLUDED.date,
+                    content = EXCLUDED.content
+                RETURNING shared_id
+            )
+            SELECT shared_id FROM inserted
         """
 
         async with self.pool.acquire() as conn:
-            await conn.execute(query, title, date, content)
+            return await conn.fetchval(query, title, date, content, locale)
+
+    async def add_news_mk(self, shared_id, title, date, content):
+        query = """
+            INSERT INTO News (shared_id, title, date, content, locale)
+            VALUES ($1, $2, $3, $4, 'mk')
+            ON CONFLICT (shared_id, locale) DO NOTHING
+        """
+
+        async with self.pool.acquire() as conn:
+            await conn.execute(query, shared_id, title, date, content)

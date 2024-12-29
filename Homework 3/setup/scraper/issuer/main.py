@@ -57,8 +57,10 @@ async def fill_in_missing_data(db, issuer_code, last_date):
 
     if stock_history:
         if found is None:
-            company_data = await utils.fetch_company(issuer_code)
+            company_data = await utils.fetch_company(issuer_code, "en")
+            company_data_mk = await utils.fetch_company(issuer_code, "mk")
             found = await db.assign_issuer(issuer_code, company_data)
+            await db.assign_issuer_mk(found, company_data_mk)
 
         entries = [
             [found, datetime.strptime(stock_entry[0].replace(".", "/"), "%d/%m/%Y").date()] + stock_entry[1:]

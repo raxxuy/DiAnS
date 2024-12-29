@@ -43,10 +43,26 @@ class Database:
             );
             """,
             """
+            CREATE TABLE IF NOT EXISTS Company_mk (
+                id SERIAL PRIMARY KEY,
+                code VARCHAR(20) NOT NULL UNIQUE,
+                name VARCHAR(255) NOT NULL,
+                address VARCHAR(100),
+                city VARCHAR(50),
+                state VARCHAR(50),
+                email VARCHAR(100),
+                website VARCHAR(100),
+                contact_person VARCHAR(100),
+                phones VARCHAR(50)[],
+                fax VARCHAR(50)[]
+            );
+            """
+            """
             CREATE TABLE IF NOT EXISTS Issuer (
                 id SERIAL PRIMARY KEY,
                 code VARCHAR(20) UNIQUE NOT NULL,
-                company_id INTEGER REFERENCES Company(id) ON DELETE CASCADE
+                company_id INTEGER REFERENCES Company(id) ON DELETE CASCADE,
+                company_mk_id INTEGER REFERENCES Company_mk(id) ON DELETE CASCADE
             );
             """,
             """
@@ -80,6 +96,16 @@ class Database:
 
         async with self.pool.acquire() as conn:
             return await conn.fetchval(query, code, name, address, city, state, email, website, contact_person, phones, fax)
+        
+    async def add_company_mk(self, code, name, address=None, city=None, state=None, email=None, website=None, contact_person=None, phones=None, fax=None):
+        query = """
+            INSERT INTO Company_mk (code, name, address, city, state, email, website, contact_person, phones, fax)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING id;
+        """
+
+        async with self.pool.acquire() as conn:
+            return await conn.fetchval(query, code, name, address, city, state, email, website, contact_person, phones, fax)
 
     async def add_issuer(self, code, company_id):
         query = """
@@ -90,6 +116,14 @@ class Database:
 
         async with self.pool.acquire() as conn:
             return await conn.fetchval(query, code, company_id)
+        
+    async def update_issuer(self, issuer_id, company_mk_id):
+        query = """
+            UPDATE Issuer SET company_mk_id = $2 WHERE id = $1;
+        """
+
+        async with self.pool.acquire() as conn:
+            await conn.execute(query, issuer_id, company_mk_id)
 
     async def add_stock_entry(self, issuer_id, date, last_trade_price, _max, _min, avg_price, percent_change, volume, turnover_best, total_turnover):
         query = """
@@ -104,6 +138,10 @@ class Database:
     async def assign_issuer(self, issuer_code, company_data):
         company_id = await self.add_company(*company_data)
         return await self.add_issuer(issuer_code, company_id)
+    
+    async def assign_issuer_mk(self, issuer_code, company_data_mk):
+        company_mk_id = await self.add_company_mk(*company_data_mk)
+        return await self.update_issuer(issuer_code, company_mk_id)
 
     async def batch_add_stock_entries(self, entries):
         query = """

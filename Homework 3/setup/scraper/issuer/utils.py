@@ -6,8 +6,19 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, SoupStrainer
 
 
-async def fetch_company(code):
-    url = f"https://www.mse.mk/en/symbol/{code}"
+async def fetch_company(code, locale):
+    url = f"https://www.mse.mk/{locale}/symbol/{code}"
+
+    translate_to_en = {
+        "Адреса": "Address",
+        "Град": "City",
+        "Држава": "State",
+        "Телефон": "Phone",
+        "Факс": "Fax",
+        "e-mail адреса": "Mail",
+        "Веб страница": "Site",
+        "Лице за контакт": "Contact person",
+    }
 
     company_data = {
         "Code": code,
@@ -46,8 +57,12 @@ async def fetch_company(code):
             for row in details:
                 cols = row.select("div")
 
+
                 if cols:
-                    key_text = cols[0].text
+                    key_text = cols[0].text.strip("\n")
+
+                    if locale == "mk" and key_text in translate_to_en:
+                        key_text = translate_to_en[key_text]
 
                     if key_text in company_data:
                         if key_text in ("Phone", "Fax"):
@@ -55,7 +70,10 @@ async def fetch_company(code):
                         else:
                             company_data[key_text] = cols[1].text
                     else:
-                        company_data["Contact person"] = cols[1].text.split("\n")[1]
+                        try:
+                            company_data["Contact person"] = cols[1].text.split("\n")[1]
+                        except IndexError:
+                            company_data["Contact person"] = cols[1].text.strip()
 
     return list(company_data.values())
 
