@@ -3,6 +3,7 @@
 import { issuer } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { SentimentAnalysis } from "@/lib/predictions/fundamental";
+import { useTranslations, useLocale } from "next-intl";
 
 const recommendationColors = {
   'STRONG BUY': 'text-green-400',
@@ -13,6 +14,9 @@ const recommendationColors = {
 };
 
 export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer?: issuer }) {
+  const t = useTranslations("FundamentalAnalysis");
+  const locale = useLocale();
+
   const [analysis, setAnalysis] = useState<SentimentAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,8 +38,8 @@ export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer
   if (!selectedIssuer) {
     return (
       <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
-        <h2 className="text-2xl font-bold mb-4">Fundamental Analysis</h2>
-        <p className="text-zinc-400">Select an issuer to view fundamental analysis</p>
+        <h2 className="text-2xl font-bold mb-4">{t("title")}</h2>
+        <p className="text-zinc-400">{t("description")}</p>
       </div>
     );
   }
@@ -43,7 +47,7 @@ export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer
   if (isLoading) {
     return (  
       <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
-        <h2 className="text-2xl font-bold mb-4">Fundamental Analysis</h2>
+        <h2 className="text-2xl font-bold mb-4">{t("title")}</h2>
         <div className="animate-pulse">
           <div className="h-4 bg-zinc-700 rounded w-3/4 mb-4"></div>
           <div className="h-4 bg-zinc-700 rounded w-1/2"></div>
@@ -54,14 +58,14 @@ export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer
 
   return (
     <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
-      <h2 className="text-2xl font-bold mb-4">Fundamental Analysis</h2>
+      <h2 className="text-2xl font-bold mb-4">{t("title")}</h2>
       {analysis ? (
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold mb-2">News Sentiment Analysis</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("newsSentiment")}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-zinc-400">Sentiment Score</p>
+                <p className="text-zinc-400">{t("sentimentScore")}</p>
                 <p className="text-xl font-mono">
                   {analysis.sentiment !== undefined ? (
                     `${analysis.sentiment >= 0 ? '+' : ''}${analysis.sentiment.toFixed(3)}`
@@ -69,14 +73,14 @@ export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer
                 </p>
               </div>
               <div>
-                <p className="text-zinc-400">Recent News Count</p>
+                <p className="text-zinc-400">{t("recentNewsCount")}</p>
                 <p className="text-xl font-mono">{analysis.newsCount ?? 0}</p>
               </div>
             </div>
           </div>
           
           <div>
-            <p className="text-zinc-400">Recommendation</p>
+            <p className="text-zinc-400">{t("recommendation")}</p>
             <p className={`text-2xl font-bold ${recommendationColors[analysis.recommendation as keyof typeof recommendationColors]}`}>
               {analysis.recommendation}
             </p>
@@ -84,12 +88,14 @@ export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer
 
           {analysis.latestDate && (
             <div className="text-sm text-zinc-500">
-              Last updated: {new Date(analysis.latestDate).toLocaleDateString()}
+              {t("lastUpdated")}: {locale === "mk" ? 
+              new Date(analysis.latestDate).toLocaleDateString("mk-MK").replace(" г.", "") 
+              :  new Date(analysis.latestDate).toLocaleDateString()}
             </div>
           )}
         </div>
       ) : (
-        <p className="text-zinc-400">No sentiment data available for this issuer</p>
+        <p className="text-zinc-400">{t("noSentimentData")}</p>
       )}
     </div>
   );

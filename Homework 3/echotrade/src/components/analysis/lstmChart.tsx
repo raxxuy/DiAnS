@@ -3,12 +3,16 @@
 import { useEffect, useRef } from "react";
 import { LSTMPrediction } from "@/lib/predictions/lstm";
 import Chart from "chart.js/auto";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function LSTMChart({
   predictions
 }: {
   predictions: LSTMPrediction[]
 }) {
+  const t = useTranslations("LSTMChart");
+  const locale = useLocale();
+
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
@@ -38,10 +42,12 @@ export default function LSTMChart({
     chartInstance.current = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: predictions.map(p => new Date(p.prediction_date).toLocaleDateString()),
+        labels: locale === "mk" ?
+          predictions.map(p => new Date(p.prediction_date).toLocaleDateString("mk-MK").replace(" г.", ""))
+          : predictions.map(p => new Date(p.prediction_date).toLocaleDateString()),
         datasets: [
           {
-            label: " Predicted Price",
+            label: ` ${t("predictedPrice")}`,
             data: predictions.map(p => parseFloat(p.predicted_price.toFixed(0))),
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: gradient,
@@ -98,13 +104,13 @@ export default function LSTMChart({
               weight: 400
             },
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 let label = context.dataset.label || '';
                 if (label) {
                   label += ': ';
                 }
                 if (context.parsed.y !== null) {
-                  label += `${context.parsed.y.toLocaleString()} MKD`;
+                  label += `${locale === "mk" ? context.parsed.y.toLocaleString("mk-MK") : context.parsed.y.toLocaleString()} ${t("currency")}`;
                 }
                 return label;
               }
@@ -143,7 +149,7 @@ export default function LSTMChart({
                 weight: 400
               },
               callback: function(value) {
-                return `${value.toLocaleString()} MKD`;
+                return `${locale === "mk" ? value.toLocaleString("mk-MK") : value.toLocaleString()} ${t("currency")}`;
               }
             }
           }
@@ -165,7 +171,7 @@ export default function LSTMChart({
     });
 
     window.dispatchEvent(new Event('resize'));
-  }, [predictions]);
+  }, [predictions, locale, t]);
 
   return (
     <div className="h-full">

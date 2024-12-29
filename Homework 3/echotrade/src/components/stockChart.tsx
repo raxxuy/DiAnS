@@ -3,12 +3,16 @@
 import { useEffect, useRef } from "react";
 import { stockhistory } from "@prisma/client";
 import Chart from "chart.js/auto";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function StockChart({
   stockHistory
 }: {
   stockHistory: stockhistory[]
 }) {
+  const t = useTranslations("StockChart");
+  const locale = useLocale();
+
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
@@ -38,10 +42,12 @@ export default function StockChart({
     chartInstance.current = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: stockHistory.map(h => new Date(h.date).toLocaleDateString()),
+        labels: locale === "mk" ? 
+        stockHistory.map(h => new Date(h.date).toLocaleDateString("mk-MK").replace(" г.", "")) 
+        : stockHistory.map(h => new Date(h.date).toLocaleDateString()),
         datasets: [
           {
-            label: " Last Trade Price",
+            label: ` ${t("lastTradePrice")}`,
             data: stockHistory.map(h => parseFloat(h.last_trade_price.replace(/[.]/g, ""))),
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: gradient,
@@ -59,7 +65,7 @@ export default function StockChart({
             cubicInterpolationMode: 'monotone'
           },
           {
-            label: " Highest Price",
+            label: ` ${t("highestPrice")}`,
             data: stockHistory.map(h => parseFloat(h.max_price.replace(/[.]/g, ""))),
             borderColor: 'rgb(34, 197, 94)',
             borderWidth: 1.5,
@@ -71,7 +77,7 @@ export default function StockChart({
             pointHoverBackgroundColor: 'rgb(34, 197, 94)',
           },
           {
-            label: " Lowest Price",
+            label: ` ${t("lowestPrice")}`,
             data: stockHistory.map(h => parseFloat(h.min_price.replace(/[.]/g, ""))),
             borderColor: 'rgb(239, 68, 68)',
             borderWidth: 1.5,
@@ -83,7 +89,7 @@ export default function StockChart({
             pointHoverBackgroundColor: 'rgb(239, 68, 68)',
           },
           {
-            label: " Average Price",
+            label: ` ${t("averagePrice")}`,
             data: stockHistory.map(h => parseFloat(h.avg_price.replace(/[.]/g, ""))),
             borderColor: 'rgb(234, 179, 8)',
             borderWidth: 1.5,
@@ -141,7 +147,7 @@ export default function StockChart({
                   label += ': ';
                 }
                 if (context.parsed.y !== null) {
-                  label += `${context.parsed.y.toLocaleString()} MKD`;
+                  label += `${locale === "mk" ? context.parsed.y.toLocaleString("mk-MK") : context.parsed.y.toLocaleString()} ${t("currency")}`;
                 }
                 return label;
               }
@@ -180,7 +186,7 @@ export default function StockChart({
                 weight: 400
               },
               callback: function(value) {
-                return `${value.toLocaleString()} MKD`;
+                return `${locale === "mk" ? value.toLocaleString("mk-MK") : value.toLocaleString()} ${t("currency")}`;
               }
             }
           }
@@ -202,7 +208,7 @@ export default function StockChart({
     });
 
     window.dispatchEvent(new Event('resize'));
-  }, [stockHistory]);
+  }, [stockHistory, locale, t]);
 
   return (
     stockHistory.length > 0 ? (
@@ -211,7 +217,7 @@ export default function StockChart({
       </div>
     ) : (
       <div className="market-data-chart h-[600px] w-full relative flex items-center justify-center">
-        <p className="text-center text-zinc-400">No data available for this period</p>
+        <p className="text-center text-zinc-400">{t("noData")}</p>
       </div>
     )
   );  

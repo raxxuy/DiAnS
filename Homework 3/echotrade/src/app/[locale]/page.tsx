@@ -159,7 +159,7 @@ export default function Home() {
 
                 <div className="mt-4 text-zinc-500 group-hover:text-zinc-400 transition-colors duration-500">
                   <Link href={feature.href} className="flex items-center gap-2">
-                    <span className="text-sm">Learn more</span>
+                    <span className="text-sm">{t("features.learnMore")}</span>
                     <svg
                       className="w-4 h-4 transition-transform duration-500 group-hover:translate-x-1"
                       fill="none"

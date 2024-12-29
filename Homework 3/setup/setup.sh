@@ -33,9 +33,6 @@ python scraper/news/main.py
 echo "Running issuer news scraper..."
 python scraper/issuer_news/main.py
 
-echo "Running sentiment analysis..."
-python analysis/sentiment.py
-
 # Run analysis
 echo "Running sentiment analysis..."
 python analysis/sentiment.py

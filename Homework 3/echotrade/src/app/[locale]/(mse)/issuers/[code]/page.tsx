@@ -95,13 +95,13 @@ export default function Issuer() {
       <div className="w-full min-h-screen bg-zinc-900 text-white px-6 md:px-20 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="bg-zinc-800/50 backdrop-blur-sm rounded-xl p-8 border border-zinc-700/30 text-center">
-            <h1 className="text-2xl font-bold text-red-400">Issuer Not Found</h1>
-            <p className="mt-4 text-zinc-400">The issuer code you&apos;re looking for doesn&apos;t exist.</p>
+            <h1 className="text-2xl font-bold text-red-400">{t("notFound.title")}</h1>
+            <p className="mt-4 text-zinc-400">{t("notFound.description")}</p>
             <Link
-              href="/issuers"
+              href={`/${locale}/issuers`}
               className="inline-block mt-6 px-4 py-2 rounded-lg bg-zinc-500/10 text-zinc-400 hover:bg-zinc-500/20 transition-colors duration-300"
             >
-              Back to Issuers
+              {t("notFound.button")}
             </Link>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { issuer } from "@prisma/client";
+import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect } from "react";
 
 interface TechnicalIndicator {
@@ -15,6 +16,9 @@ interface TechnicalIndicator {
 }
 
 export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?: issuer }) {
+  const t = useTranslations("TechnicalAnalysis");
+  const locale = useLocale();
+  
   const [technicalIndicators, setTechnicalIndicators] = useState<TechnicalIndicator[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,8 +39,8 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
   if (!selectedIssuer) {
     return (
       <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
-        <h2 className="text-2xl font-bold mb-4">Technical Analysis</h2>
-        <p className="text-zinc-400">Select an issuer to view technical analysis</p>
+        <h2 className="text-2xl font-bold mb-4">{t("title")}</h2>
+        <p className="text-zinc-400">{t("description")}</p>
       </div>
     );
   }
@@ -44,7 +48,7 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
   if (isLoading) {
     return (
       <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
-        <h2 className="text-2xl font-bold mb-4">Technical Analysis</h2>
+        <h2 className="text-2xl font-bold mb-4">{t("title")}</h2>
         <div className="flex justify-center items-center h-48">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-zinc-400"></div>
         </div>
@@ -54,11 +58,11 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
 
   return (
     <div className="bg-zinc-800/50 p-6 rounded-xl border border-zinc-700">
-      <h2 className="text-2xl font-bold mb-4">Technical Analysis</h2>
+      <h2 className="text-2xl font-bold mb-4">{t("title")}</h2>
       {technicalIndicators.length > 0 ? (
         <div className="space-y-6">
           <div>
-            <h3 className="text-xl font-semibold mb-3">Oscillators</h3>
+            <h3 className="text-xl font-semibold mb-3">{t("oscillators")}</h3>
             <div className="space-y-4">
               {technicalIndicators
                 .filter(i => i.type === "oscillator")
@@ -75,16 +79,16 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-sm">
                       <div>
-                        <div className="text-zinc-400">Daily</div>
-                        <div>{indicator.values.daily.toFixed(2)}</div>
+                        <div className="text-zinc-400">{t("daily")}</div>
+                        <div>{indicator.values.daily.toLocaleString(locale === "mk" ? "mk-MK" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       </div>
                       <div>
-                        <div className="text-zinc-400">Weekly</div>
-                        <div>{indicator.values.weekly.toFixed(2)}</div>
+                        <div className="text-zinc-400">{t("weekly")}</div>
+                        <div>{indicator.values.weekly.toLocaleString(locale === "mk" ? "mk-MK" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       </div>
                       <div>
-                        <div className="text-zinc-400">Monthly</div>
-                        <div>{indicator.values.monthly.toFixed(2)}</div>
+                        <div className="text-zinc-400">{t("monthly")}</div>
+                        <div>{indicator.values.monthly.toLocaleString(locale === "mk" ? "mk-MK" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       </div>
                     </div>
                   </div>
@@ -92,7 +96,7 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-semibold mb-3">Moving Averages</h3>
+            <h3 className="text-xl font-semibold mb-3">{t("movingAverages")}</h3>
             <div className="space-y-4">
               {technicalIndicators
                 .filter(i => i.type === "ma")
@@ -109,16 +113,16 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-sm">
                       <div>
-                        <div className="text-zinc-400">Daily</div>
-                        <div>{indicator.values.daily.toFixed(2)}</div>
+                        <div className="text-zinc-400">{t("daily")}</div>
+                        <div>{indicator.values.daily.toLocaleString(locale === "mk" ? "mk-MK" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       </div>
                       <div>
-                        <div className="text-zinc-400">Weekly</div>
-                        <div>{indicator.values.weekly.toFixed(2)}</div>
+                        <div className="text-zinc-400">{t("weekly")}</div>
+                        <div>{indicator.values.weekly.toLocaleString(locale === "mk" ? "mk-MK" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       </div>
                       <div>
-                        <div className="text-zinc-400">Monthly</div>
-                        <div>{indicator.values.monthly.toFixed(2)}</div>
+                        <div className="text-zinc-400">{t("monthly")}</div>
+                        <div>{indicator.values.monthly.toLocaleString(locale === "mk" ? "mk-MK" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                       </div>
                     </div>
                   </div>
@@ -128,8 +132,7 @@ export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?:
         </div>
       ) : (
         <p className="text-zinc-400">
-          Not enough historical data available for technical analysis.
-          This issuer needs at least 14 days of trading data.
+          {t("notEnoughData")}
         </p>
       )}
     </div>
