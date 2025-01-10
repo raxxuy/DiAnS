@@ -1,0 +1,4 @@
+**/__pycache__/
+**/venv/
+**/setup/db/
+**/setup/analysis/models/

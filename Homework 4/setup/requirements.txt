@@ -1,0 +1,12 @@
+setuptools
+aiohttp
+aiolimiter
+asyncpg
+beautifulsoup4
+lxml
+textblob
+requests
+PyPDF2
+tensorflow-cpu
+scikit-learn
+numpy

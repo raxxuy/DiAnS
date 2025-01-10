@@ -1,0 +1,167 @@
+{
+  "Home": {
+    "main": {
+      "span": "Macedonian Stock Exchange",
+      "description1": "Gain real-time insights and predictive analytics for the ",
+      "description2": " enabling you to monitor market trends, evaluate stock performance, and make informed, data-driven investment decisions.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More"
+    },
+    "footer": {
+      "copyright": "Copyright © 2024 EchoTrade. All rights reserved.",
+      "home": "Home",
+      "about": "About",
+      "marketData": "Market Data",
+      "predictions": "Predictions",
+      "news": "News"
+    },
+    "features": {
+      "title": "Powerful Features for Smart Trading",
+      "card1": "Real-time Analytics",
+      "card2": "Predictive AI",
+      "card3": "Market Pulse",
+      "card1Description": "Get instant market insights with live data visualization and performance metrics",
+      "card2Description": "Advanced machine learning algorithms to forecast market trends with precision",
+      "card3Description": "Stay ahead with real-time news alerts and market sentiment analysis",
+      "learnMore": "Learn More"
+    }
+  },
+  "MarketData": {
+    "title": "Market Data",
+    "description": "Track historical stock prices and market performance",
+    "selectIssuer": "Select an issuer",
+    "table": {
+      "date": "Date",
+      "lastTradePrice": "Last Trade Price",
+      "maxPrice": "Max Price",
+      "minPrice": "Min Price",
+      "avgPrice": "Avg Price",
+      "change": "Change",
+      "volume": "Volume",
+      "turnoverBest": "Turnover in BEST",
+      "totalTurnover": "Total Turnover"
+    },
+    "view": {
+      "table": "Table",
+      "chart": "Chart"
+    },
+    "loading": "Loading...",
+    "noData": "No data available for this period"
+  },
+  "Issuers": {
+    "title": "Issuers",
+    "description": "Browse and analyze stock issuers on the Macedonian Stock Exchange",
+    "placeholder": "Search issuers...",
+    "card": {
+      "details": "View Details",
+      "analysis": "Analysis"
+    }
+  },
+  "Issuer": {
+    "description": "Company Details and Information",
+    "company": {
+      "information": {
+        "title": "Company Information",
+        "name": "Company Name",
+        "address": "Address",
+        "website": "Website"
+      },
+      "contact": {
+        "title": "Contact Details",
+        "person": "Contact Person",
+        "email": "Email",
+        "phone": "Phone Numbers"
+      }
+    },
+    "links": {
+      "marketData": "Market Data",
+      "predictions": "Predictions"
+    },
+    "notFound": {
+      "title": "Issuer not found",
+      "description": "The issuer code you're looking for doesn't exist.",
+      "button": "Back to Issuers"
+    }
+  },
+  "Predictions": {
+    "title": "Stock Predictions",
+    "description": "Predict the future of stocks with technical and fundamental analysis",
+    "selectIssuer": "Select an issuer"
+  },
+  "News": {
+    "title": "Latest Market News",
+    "description": "Stay updated with the latest news from the Macedonian Stock Exchange",
+    "placeholder": "Search news...",
+    "pagination": {
+      "previous": "Previous",
+      "current": "Page {currentPage} of {totalPages}",
+      "of": "of",
+      "next": "Next"
+    }
+  },
+  "About": {
+    "title": "About EchoTrade",
+    "vision": "Our Vision",
+    "mission": "Our Mission",
+    "whyEchoTrade": "Why EchoTrade?",
+    "targetedMarket": "Targeted for the Macedonian Market",
+    "advancedTools": "Advanced Tools with Simplicity",
+    "realTimeInsights": "Real-Time Insights",
+    "visionDescription": "EchoTrade aims to transform the way individuals and institutions engage with the Macedonian Stock Exchange. By leveraging cutting-edge technologies such as machine learning, real-time data analytics, and predictive modeling, EchoTrade empowers users with accurate information to make smarter, data-driven investment choices.",
+    "missionDescription": "The mission of EchoTrade is to deliver high-quality, actionable insights to the Macedonian stock market, enabling users to understand market trends, forecast stock movements, and optimize their investment strategies. We strive to create a seamless and intuitive experience for all types of users, from beginners to professionals.",
+    "targetedMarketDescription": "Unlike global stock platforms, EchoTrade is designed specifically to meet the needs of investors in the Macedonian Stock Exchange, offering localized data and insights.",
+    "advancedToolsDescription": "Despite the sophisticated analytics and prediction models, the platform ensures ease of use for all levels of expertise.",
+    "realTimeInsightsDescription": "With EchoTrade, you gain immediate access to the latest data, empowering faster and more informed decision-making.",
+    "future": "EchoTrade continues to evolve, aiming to bring innovative solutions to the Macedonian financial ecosystem and to foster a more informed and efficient stock market environment."
+  },
+  "NavBar": {
+    "home": "Home",
+    "marketData": "Market Data",
+    "issuers": "Issuers",
+    "predictions": "Predictions",
+    "news": "News",
+    "about": "About"
+  },
+  "SearchBar": {
+    "placeholder": "Search issuers...",
+    "tip1": "Press ",
+    "tip2": "to search"
+  },
+  "StockChart": {
+    "currency": "MKD",
+    "lastTradePrice": "Last Trade Price",
+    "highestPrice": "Highest Price",
+    "lowestPrice": "Lowest Price",
+    "averagePrice": "Average Price",
+    "noData": "No data available for this period"
+  },
+  "TechnicalAnalysis": {
+    "title": "Technical Analysis",
+    "description": "Select an issuer to view technical analysis",
+    "oscillators": "Oscillators",
+    "movingAverages": "Moving Averages",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "notEnoughData": "Not enough historical data available for technical analysis. This issuer needs at least 14 days of trading data this year."
+  },
+  "FundamentalAnalysis": {
+    "title": "Fundamental Analysis",
+    "description": "Select an issuer to view fundamental analysis",
+    "newsSentiment": "News Sentiment Analysis",
+    "recentNewsCount": "Recent News Count",
+    "sentimentScore": "Sentiment Score",
+    "recommendation": "Recommendation",
+    "lastUpdated": "Last Updated",
+    "noSentimentData": "No sentiment data available for this issuer"
+  },
+  "LSTMPredictions": {
+    "title": "LSTM Price Predictions",
+    "description": "Select an issuer to view LSTM price predictions",
+    "notEnoughData": "Not enough historical data to generate predictions. The issuer must have at least 10 days of historical data."
+  },
+  "LSTMChart": {
+    "predictedPrice": "Predicted Price",
+    "currency": "MKD"
+  }
+}

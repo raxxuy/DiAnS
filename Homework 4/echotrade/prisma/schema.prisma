@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model company {
+  id             Int      @id @default(autoincrement())
+  code           String   @unique @db.VarChar(20)
+  name           String   @db.VarChar(255)
+  address        String?  @db.VarChar(100)
+  city           String?  @db.VarChar(50)
+  state          String?  @db.VarChar(50)
+  email          String?  @db.VarChar(100)
+  website        String?  @db.VarChar(100)
+  contact_person String?  @db.VarChar(100)
+  phones         String[] @db.VarChar(50)
+  fax            String[] @db.VarChar(50)
+  issuer         issuer[]
+}
+
+model issuer {
+  id               Int                @id @default(autoincrement())
+  code             String             @unique @db.VarChar(20)
+  company_id       Int?
+  company_mk_id    Int?
+  company          company?           @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  company_mk       company_mk?        @relation(fields: [company_mk_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  issuer_news      issuer_news[]
+  lstm_predictions lstm_predictions[]
+  news_sentiment   news_sentiment[]
+  stockhistory     stockhistory[]
+}
+
+model stockhistory {
+  id               Int      @id @default(autoincrement())
+  issuer_id        Int
+  date             DateTime @db.Date
+  last_trade_price String   @db.VarChar(255)
+  max_price        String   @db.VarChar(255)
+  min_price        String   @db.VarChar(255)
+  avg_price        String   @db.VarChar(255)
+  percent_change   String   @db.VarChar(255)
+  volume           String   @db.VarChar(255)
+  turnover_best    String   @db.VarChar(255)
+  total_turnover   String   @db.VarChar(255)
+  issuer           issuer   @relation(fields: [issuer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([issuer_id, date], map: "unique_stock_entry")
+}
+
+model news {
+  id        Int      @id @default(autoincrement())
+  shared_id Int
+  locale    String   @db.VarChar(2)
+  title     String   @db.VarChar(255)
+  date      DateTime @db.Date
+  content   String[]
+
+  @@unique([shared_id, locale])
+}
+
+model company_mk {
+  id             Int      @id @default(autoincrement())
+  code           String   @unique @db.VarChar(20)
+  name           String   @db.VarChar(255)
+  address        String?  @db.VarChar(100)
+  city           String?  @db.VarChar(50)
+  state          String?  @db.VarChar(50)
+  email          String?  @db.VarChar(100)
+  website        String?  @db.VarChar(100)
+  contact_person String?  @db.VarChar(100)
+  phones         String[] @db.VarChar(50)
+  fax            String[] @db.VarChar(50)
+  issuer         issuer[]
+}
+
+model issuer_news {
+  id             Int             @id @default(autoincrement())
+  seinet_id      Int
+  issuer_id      Int
+  content        String?
+  date           DateTime        @db.Date
+  attachments    String[]
+  issuer         issuer          @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  news_sentiment news_sentiment?
+
+  @@unique([issuer_id, id])
+}
+
+model news_sentiment {
+  id             Int         @id @default(autoincrement())
+  issuer_id      Int
+  issuer_news_id Int         @unique
+  sentiment      Float
+  created_at     DateTime    @default(now()) @db.Date
+  issuer         issuer      @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issuer_news    issuer_news @relation(fields: [issuer_news_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model lstm_predictions {
+  id              Int      @id @default(autoincrement())
+  issuer_id       Int
+  prediction_date DateTime @db.Date
+  predicted_price Float
+  created_at      DateTime @default(now()) @db.Date
+  issuer          issuer   @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([issuer_id, prediction_date])
+}
