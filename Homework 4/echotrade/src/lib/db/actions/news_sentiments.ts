@@ -25,7 +25,7 @@ export async function getRecentNewsSentiments(issuerId: number) {
       issuer_news: {
         issuer_id: issuerId,
         date: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
         }
       }
     },
