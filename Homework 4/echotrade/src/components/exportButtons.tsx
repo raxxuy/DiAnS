@@ -1,5 +1,5 @@
 import { saveAs } from 'file-saver';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { stockhistory } from '@prisma/client';
