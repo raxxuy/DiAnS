@@ -1,0 +1,7 @@
+setuptools
+aiohttp
+aiolimiter
+asyncpg
+beautifulsoup4
+lxml
+python-dotenv

@@ -1,0 +1,9 @@
+setuptools
+aiohttp
+aiolimiter
+asyncpg
+requests
+beautifulsoup4
+lxml
+PyPDF2
+python-dotenv
