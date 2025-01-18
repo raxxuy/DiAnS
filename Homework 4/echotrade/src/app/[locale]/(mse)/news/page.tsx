@@ -6,6 +6,8 @@ import Link from "next/link";
 import SearchBar from "@/components/searchBar";
 import { useLocale, useTranslations } from "next-intl";
 
+const apiUrl = process.env.API_URL || "http://localhost:5000";
+
 export default function News() {
   const t = useTranslations("News");
   const locale = useLocale();
@@ -20,7 +22,7 @@ export default function News() {
   );
 
   useEffect(() => {
-    fetch(`/api/news?locale=${locale}`)
+    fetch(`${apiUrl}/api/news?locale=${locale}`)
       .then(res => res.json())
       .then(data => {
         setNews(data.sort((a: news, b: news) => new Date(b.date).getTime() - new Date(a.date).getTime()));

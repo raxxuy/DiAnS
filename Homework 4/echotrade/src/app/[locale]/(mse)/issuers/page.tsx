@@ -6,6 +6,8 @@ import { company, issuer } from "@prisma/client";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 
+const apiUrl = process.env.API_URL || "http://localhost:5000";
+
 export default function Issuers() {
   const t = useTranslations("Issuers");
   const locale = useLocale();
@@ -19,11 +21,11 @@ export default function Issuers() {
   );
 
   useEffect(() => {
-    fetch(`/api/issuers`)
+    fetch(`${apiUrl}/api/issuers`)
       .then(res => res.json())
       .then(data => {
         setIssuers(data.sort((a: issuer, b: issuer) => a.code.localeCompare(b.code)));
-        fetch(`/api/companies?locale=${locale}`)
+        fetch(`${apiUrl}/api/companies?locale=${locale}`)
           .then(res => res.json())
           .then(companyData => {
             setCompanies(companyData);

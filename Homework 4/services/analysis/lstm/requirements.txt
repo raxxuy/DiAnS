@@ -1,0 +1,7 @@
+setuptools
+aiohttp
+asyncpg
+python-dotenv
+tensorflow-cpu
+numpy
+scikit-learn

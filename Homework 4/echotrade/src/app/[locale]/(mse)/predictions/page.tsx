@@ -9,6 +9,8 @@ import LSTMPredictions from "@/components/analysis/lstmPredictions";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 
+const apiUrl = process.env.API_URL || "http://localhost:5000";
+
 export default function Predictions() {
   const t = useTranslations("Predictions");
   const router = useRouter();
@@ -19,7 +21,7 @@ export default function Predictions() {
   const [selectedIssuer, setSelectedIssuer] = useState<issuer>();
 
   useEffect(() => {
-    fetch("/api/issuers")
+    fetch(`${apiUrl}/api/issuers`)
       .then(res => res.json())
       .then(data => {
         setIssuers(data.sort((a: issuer, b: issuer) => a.code.localeCompare(b.code)));

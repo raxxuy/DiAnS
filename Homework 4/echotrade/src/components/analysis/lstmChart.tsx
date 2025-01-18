@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { LSTMPrediction } from "@/lib/predictions/lstm";
 import Chart from "chart.js/auto";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function LSTMChart({
   predictions
 }: {
-  predictions: LSTMPrediction[]
+  predictions: any[]
 }) {
   const t = useTranslations("LSTMChart");
   const locale = useLocale();

@@ -1,9 +1,8 @@
-import asyncpg
-from asyncpg.pool import Pool
+from asyncpg import create_pool, Pool
 
 
 class Database:
-    def __init__(self, user, password, database, host="localhost"):
+    def __init__(self, user, password, database, host):
         self.pool: Pool | None = None
         self.user = user
         self.password = password
@@ -11,13 +10,13 @@ class Database:
         self.host = host
 
     async def connect(self):
-        self.pool = await asyncpg.create_pool(
+        self.pool = await create_pool(
             user=self.user,
             password=self.password,
             database=self.database,
             host=self.host,
             min_size=1,
-            max_size=15
+            max_size=30
         )
 
     async def close(self):
@@ -88,10 +87,14 @@ class Database:
                 await conn.execute(query)
         
     async def create_news_table(self):
-        query = """
+        queries = [
+            """
+            CREATE SEQUENCE IF NOT EXISTS news_shared_id_seq;
+            """,
+            """
             CREATE TABLE IF NOT EXISTS News (
                 id SERIAL PRIMARY KEY,
-                shared_id INTEGER NOT NULL,
+                shared_id INTEGER NOT NULL DEFAULT nextval('news_shared_id_seq'),
                 locale VARCHAR(2) NOT NULL,
                 title VARCHAR(255) NOT NULL,
                 date DATE NOT NULL,
@@ -99,9 +102,11 @@ class Database:
                 UNIQUE(shared_id, locale)
             );
             """
+        ]
 
         async with self.pool.acquire() as conn:
-            await conn.execute(query)
+            for query in queries:
+                await conn.execute(query)
                 
     async def create_issuer_news_table(self):
         query = """
@@ -224,15 +229,12 @@ class Database:
         
     async def add_news(self, title, date, content, locale):
         query = """
-            WITH inserted AS (
-                INSERT INTO News (shared_id, title, date, content, locale)
-                VALUES (COALESCE((SELECT MAX(id) FROM News), 0) + 1, $1, $2, $3, $4)
-                ON CONFLICT (shared_id, locale) DO UPDATE SET
-                    date = EXCLUDED.date,
-                    content = EXCLUDED.content
-                RETURNING shared_id
-            )
-            SELECT shared_id FROM inserted
+            INSERT INTO News (title, date, content, locale)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (shared_id, locale) DO UPDATE SET
+                date = EXCLUDED.date,
+                content = EXCLUDED.content
+            RETURNING shared_id
         """
 
         async with self.pool.acquire() as conn:

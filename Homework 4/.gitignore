@@ -2,3 +2,10 @@
 **/venv/
 **/setup/db/
 **/setup/analysis/models/
+**/services/**/models/
+**/services/**/node_modules/
+**/services/**/dist/
+**/services/**/venv/
+**/services/**/__pycache__/
+**/services/**/models/
+.env

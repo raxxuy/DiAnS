@@ -52,6 +52,7 @@
     "title": "Issuers",
     "description": "Browse and analyze stock issuers on the Macedonian Stock Exchange",
     "placeholder": "Search issuers...",
+    "noIssuersFound": "No issuers found",
     "card": {
       "details": "View Details",
       "analysis": "Analysis"
@@ -143,7 +144,7 @@
     "daily": "Daily",
     "weekly": "Weekly",
     "monthly": "Monthly",
-    "notEnoughData": "Not enough historical data available for technical analysis. This issuer needs at least 14 days of trading data this year."
+    "notEnoughData": "Not enough historical data available for technical analysis. This issuer needs at least 14 days of trading data from a year ago."
   },
   "FundamentalAnalysis": {
     "title": "Fundamental Analysis",
@@ -158,7 +159,7 @@
   "LSTMPredictions": {
     "title": "LSTM Price Predictions",
     "description": "Select an issuer to view LSTM price predictions",
-    "notEnoughData": "Not enough historical data to generate predictions. The issuer must have at least 10 days of historical data."
+    "notEnoughData": "Not enough historical data to generate predictions. The issuer must have at least 10 days of historical data from a year ago."
   },
   "LSTMChart": {
     "predictedPrice": "Predicted Price",

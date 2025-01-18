@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
+const apiUrl = process.env.API_URL || "http://localhost:5000";
+
 export default function Issuer() {
   const t = useTranslations("Issuer");
   const locale = useLocale();
@@ -16,12 +18,12 @@ export default function Issuer() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/issuers/${code}`)
+    fetch(`${apiUrl}/api/issuers/${code}`)
       .then(res => res.json())
       .then(data => {
         setIssuer(data);
         if (data) {
-          fetch(`/api/companies/${data.company_id}?locale=${locale}`)
+          fetch(`${apiUrl}/api/companies/${data.company_id}?locale=${locale}`)
             .then(res => res.json())
             .then(companyData => {
               setCompany(companyData);

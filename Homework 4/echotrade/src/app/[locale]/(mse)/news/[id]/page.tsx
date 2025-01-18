@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { news } from "@prisma/client";
 
+const apiUrl = process.env.API_URL || "http://localhost:5000";
+
 export default function NewsItem() {
   const locale = useLocale();
   const { id } = useParams();
@@ -13,7 +15,7 @@ export default function NewsItem() {
   const [news, setNews] = useState<news>();
 
   useEffect(() => {
-    fetch(`/api/news/${id}?locale=${locale}`)
+    fetch(`${apiUrl}/api/news/${id}?locale=${locale}`)
       .then(res => res.json())
       .then(data => {
         setNews(data);

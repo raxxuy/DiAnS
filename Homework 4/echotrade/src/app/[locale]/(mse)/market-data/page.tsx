@@ -8,6 +8,8 @@ import StockChart from "@/components/stockChart";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 
+const apiUrl = process.env.API_URL || "http://localhost:5000";  
+
 export default function MarketData() {
   const t = useTranslations("MarketData");
   const locale = useLocale();
@@ -24,7 +26,7 @@ export default function MarketData() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/issuers")
+    fetch(`${apiUrl}/api/issuers`)
       .then(res => res.json())
       .then(data => {
         setIssuers(data.sort((a: issuer, b: issuer) => a.code.localeCompare(b.code)));
@@ -37,7 +39,7 @@ export default function MarketData() {
 
     if (fromDate && toDate) {
       setIsLoading(true);
-      fetch(`/api/stocks/${selectedIssuer.id}`)
+      fetch(`${apiUrl}/api/stocks/${selectedIssuer.id}`)
         .then(res => res.json())
         .then(data => {
           const filteredHistory = data

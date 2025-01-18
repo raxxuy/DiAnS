@@ -2,7 +2,6 @@
 
 import { issuer } from "@prisma/client";
 import { useEffect, useState } from "react";
-import { SentimentAnalysis } from "@/lib/predictions/fundamental";
 import { useTranslations, useLocale } from "next-intl";
 
 const recommendationColors = {
@@ -13,11 +12,13 @@ const recommendationColors = {
   'STRONG SELL': 'text-red-400',
 };
 
+const apiUrl = process.env.API_URL || "http://localhost:5000";
+
 export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer?: issuer }) {
   const t = useTranslations("FundamentalAnalysis");
   const locale = useLocale();
 
-  const [analysis, setAnalysis] = useState<SentimentAnalysis | null>(null);
+  const [analysis, setAnalysis] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer
 
     setIsLoading(true);
 
-    fetch(`/api/predictions/fundamental?issuer_id=${selectedIssuer.id}`)
+    fetch(`${apiUrl}/api/analysis/fundamental?issuer_id=${selectedIssuer.id}`)
       .then((res) => res.json())
       .then((data) => setAnalysis(data))
       .catch((err) => console.error(err))

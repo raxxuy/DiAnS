@@ -7,6 +7,7 @@ from multiprocessing import Pool
 from .base_scraper import BaseScraper
 from .database import Database
 
+
 class ScraperDecorator(BaseScraper):
     def __init__(self, scraper: BaseScraper):
         self._scraper = scraper
@@ -38,8 +39,9 @@ class ScraperDecorator(BaseScraper):
 
 
 class MultiProcessScraper(ScraperDecorator):
-    def __init__(self, scraper: BaseScraper):
+    def __init__(self, scraper: BaseScraper, process_count: int = os.cpu_count()):
         super().__init__(scraper)
+        self.process_count = process_count
         
     async def execute_scraping(self):
         await self.connect_db()
@@ -48,7 +50,7 @@ class MultiProcessScraper(ScraperDecorator):
         await self.cleanup()
         
     async def process_data(self, items):
-        with Pool(processes=os.cpu_count()) as pool:
+        with Pool(processes=self.process_count) as pool:
             # Pass the scraper class, item, and db_params to the worker
             pool.starmap(process_item_worker, 
                         [(self.original_class, item, self.db_params) for item in items])

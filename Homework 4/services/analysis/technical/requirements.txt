@@ -1,0 +1,7 @@
+setuptools
+aiohttp
+asyncpg
+pandas
+numpy
+ta-lib
+python-dotenv 
