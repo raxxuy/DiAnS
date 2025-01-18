@@ -49,7 +49,7 @@ class IssuerNewsScraper(BaseScraper):
 
     async def fetch_last_available_date(self, item): # item is (issuer_id, db_id) in this case
         issuer_id, db_id = item
-        return await self.db.get_last_available_issuer_news_date(issuer_id)
+        return await self.db.get_last_available_issuer_news_date(db_id)
     
     async def fill_in_missing_data(self, last_date, item):
         issuer_id, db_id = item

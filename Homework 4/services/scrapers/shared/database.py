@@ -118,7 +118,7 @@ class Database:
                 date DATE NOT NULL,
                 attachments TEXT[],
                 FOREIGN KEY (issuer_id) REFERENCES issuer(id),
-                UNIQUE(issuer_id, id)
+                UNIQUE(issuer_id, seinet_id)
             );
         """
 
@@ -271,7 +271,7 @@ class Database:
         query = """
             INSERT INTO issuer_news (issuer_id, seinet_id, content, date, attachments)
             VALUES ($1, $2, $3, $4, $5)
-            ON CONFLICT (issuer_id, id) DO NOTHING
+            ON CONFLICT (issuer_id, seinet_id) DO NOTHING
         """
 
         try:
