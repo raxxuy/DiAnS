@@ -58,6 +58,11 @@ class LSTMAnalyzer(BaseAnalyzer[IssuerData]):
         """Process a single issuer's data to generate predictions"""
         issuer_code, issuer_id, prices = item
         
+        creation_date = await self.db.get_recent_lstm_prediction_creation_date(issuer_id)
+        if creation_date and creation_date == datetime.now().date():
+            print(f"Skipping {issuer_code} - already has predictions for today")
+            return
+        
         if len(prices) < 10:
             print(f"Skipping {issuer_code} - insufficient data (need at least 10 data points)")
             return

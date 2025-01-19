@@ -87,15 +87,30 @@ class Database:
     async def create_lstm_predictions_table(self) -> None:
         """Create or recreate LSTM predictions table"""
         drop_query = """
-            DROP TABLE IF EXISTS lstm_predictions CASCADE;
+            DO $$
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 
+                    FROM information_schema.tables 
+                    WHERE table_name = 'lstm_predictions'
+                ) THEN
+                    DELETE FROM lstm_predictions 
+                    WHERE issuer_id IN (
+                        SELECT DISTINCT issuer_id 
+                        FROM lstm_predictions 
+                        WHERE DATE(created_at) != CURRENT_DATE
+                    );
+                END IF;
+            END $$;
         """
         
         create_query = """
-            CREATE TABLE lstm_predictions (
+            CREATE TABLE IF NOT EXISTS lstm_predictions (
                 id SERIAL PRIMARY KEY,
                 issuer_id INT NOT NULL,
                 prediction_date DATE NOT NULL,
                 predicted_price FLOAT NOT NULL,
+                created_at DATE NOT NULL DEFAULT NOW(),
                 FOREIGN KEY (issuer_id) REFERENCES issuer(id),
                 CONSTRAINT unique_issuer_date UNIQUE (issuer_id, prediction_date)
             );
@@ -210,3 +225,14 @@ class Database:
         """
         async with self.pool.acquire() as conn:
             return await conn.fetch(query, issuer_id)
+        
+    async def get_recent_lstm_prediction_creation_date(self, issuer_id: int) -> Optional[date]:
+        """Get recent LSTM prediction creation date for an issuer"""
+        query = """
+            SELECT created_at FROM lstm_predictions
+            WHERE issuer_id = $1
+            ORDER BY created_at DESC
+            LIMIT 1
+        """
+        async with self.pool.acquire() as conn:
+            return await conn.fetchval(query, issuer_id)

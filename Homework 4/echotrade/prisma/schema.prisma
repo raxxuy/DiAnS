@@ -55,7 +55,7 @@ model stockhistory {
 
 model news {
   id        Int      @id @default(autoincrement())
-  shared_id Int
+  shared_id Int      @default(autoincrement())
   locale    String   @db.VarChar(2)
   title     String   @db.VarChar(255)
   date      DateTime @db.Date
@@ -89,7 +89,7 @@ model issuer_news {
   issuer         issuer          @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   news_sentiment news_sentiment?
 
-  @@unique([issuer_id, id])
+  @@unique([issuer_id, seinet_id])
 }
 
 model news_sentiment {
@@ -110,7 +110,7 @@ model lstm_predictions {
   created_at      DateTime @default(now()) @db.Date
   issuer          issuer   @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([issuer_id, prediction_date])
+  @@unique([issuer_id, prediction_date], map: "unique_issuer_date")
 }
 
 model technical_analysis {
