@@ -37,7 +37,7 @@ RUN crontab /etc/cron.d/scraper-cron
 # Create a startup script
 RUN echo '#!/bin/bash\n\
 export DB_HOST=${DB_HOST}\n\
-export DB_NAME=${DB_DATABASE}\n\
+export DB_DATABASE=${DB_DATABASE}\n\
 export DB_USER=${DB_USER}\n\
 export DB_PASSWORD=${DB_PASSWORD}\n\
 rm -f /app/scraping_complete\n\

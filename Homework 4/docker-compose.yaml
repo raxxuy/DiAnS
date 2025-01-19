@@ -11,7 +11,7 @@ services:
       - API_URL=${API_URL}
       - PORT=3000
     depends_on:
-      postgres:
+      echotrade-db:
         condition: service_healthy
       api:
         condition: service_healthy
@@ -29,7 +29,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - PORT=5000
     depends_on:
-      postgres:
+      echotrade-db:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -40,7 +40,7 @@ services:
       timeout: 5s
       retries: 5
 
-  postgres:
+  echotrade-db:
     image: postgres:16
     env_file: .env
     environment:
@@ -64,12 +64,12 @@ services:
       context: ./services/analysis
       dockerfile: lstm/Dockerfile
     environment:
-      - DB_HOST=postgres
-      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_DATABASE=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      postgres:
+      echotrade-db:
         condition: service_healthy
       issuer-scraper:
         condition: service_healthy
@@ -82,12 +82,12 @@ services:
       context: ./services/analysis
       dockerfile: fundamental/Dockerfile
     environment:
-      - DB_HOST=postgres
-      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_DATABASE=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      postgres:
+      echotrade-db:
         condition: service_healthy
       issuer-news-scraper:
         condition: service_healthy
@@ -100,12 +100,12 @@ services:
       context: ./services/analysis
       dockerfile: technical/Dockerfile
     environment:
-      - DB_HOST=postgres
-      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_DATABASE=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      postgres:
+      echotrade-db:
         condition: service_healthy
       issuer-scraper:
         condition: service_healthy
@@ -118,12 +118,12 @@ services:
       context: ./services/scrapers
       dockerfile: issuers/Dockerfile
     environment:
-      - DB_HOST=postgres
-      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_DATABASE=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      postgres:
+      echotrade-db:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "test -f /app/scraping_complete || exit 1"]
@@ -140,12 +140,12 @@ services:
       context: ./services/scrapers
       dockerfile: news/Dockerfile
     environment:
-      - DB_HOST=postgres
-      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_DATABASE=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      postgres:
+      echotrade-db:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -156,14 +156,14 @@ services:
       context: ./services/scrapers
       dockerfile: issuer_news/Dockerfile
     environment:
-      - DB_HOST=postgres
-      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_DATABASE=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
       issuer-scraper:
         condition: service_healthy
-      postgres:
+      echotrade-db:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "test -f /app/scraping_complete || exit 1"]
