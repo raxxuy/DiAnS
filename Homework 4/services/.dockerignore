@@ -1,6 +1,6 @@
-**/node_modules/
-**/dist/
-**/package-lock.json
-**/venv/
-**/__pycache__/
-**/models/
+**/node_modules
+**/dist
+**/venv
+**/__pycache__
+**/models
+.dockerignore

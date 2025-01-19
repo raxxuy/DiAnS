@@ -3,7 +3,7 @@ FROM node:22-slim
 WORKDIR /app
 
 # Install OpenSSL 1.1.x
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
@@ -27,8 +27,5 @@ COPY src ./src
 RUN npm run build
 
 EXPOSE 5000
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
 
 CMD ["npm", "start"] 

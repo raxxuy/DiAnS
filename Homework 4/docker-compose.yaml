@@ -1,5 +1,25 @@
 name: services
 services:
+  echotrade:
+    build:
+      context: ./echotrade
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - API_URL=${API_URL}
+      - PORT=3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+
   api:
     build: 
       context: ./services/api
@@ -12,10 +32,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
     networks:
       - app-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://api:5000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: postgres:16
@@ -48,6 +74,7 @@ services:
         condition: service_healthy
       issuer-scraper:
         condition: service_healthy
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -65,6 +92,7 @@ services:
         condition: service_healthy
       issuer-news-scraper:
         condition: service_healthy
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -82,9 +110,9 @@ services:
         condition: service_healthy
       issuer-scraper:
         condition: service_healthy
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
   issuer-scraper:
     build:
       context: ./services/scrapers
@@ -103,6 +131,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -118,6 +147,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -141,6 +171,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
