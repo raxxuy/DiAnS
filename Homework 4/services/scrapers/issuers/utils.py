@@ -40,6 +40,10 @@ async def fetch_company(code: str, locale: str) -> CompanyData:
 
     async with ClientSession() as session:
         async with session.get(url) as response:
+            if response.status != 200:
+                time.sleep(1)
+                return await fetch_company(code, locale)
+            
             response_text = await response.text()
             soup = BeautifulSoup(response_text, 'lxml', parse_only=SoupStrainer('div'))
 

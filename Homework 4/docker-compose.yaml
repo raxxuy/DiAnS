@@ -19,7 +19,6 @@ services:
     networks:
       - app-network
 
-
   api:
     build: 
       context: ./services/api
@@ -35,8 +34,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://api:5000/health || exit 1"]
       interval: 10s
@@ -59,6 +56,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   lstm-analyzer:
     build:
@@ -75,8 +74,8 @@ services:
       issuer-scraper:
         condition: service_healthy
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
 
   fundamental-analyzer:
     build:
@@ -93,8 +92,8 @@ services:
       issuer-news-scraper:
         condition: service_healthy
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
 
   technical-analyzer:
     build:
@@ -111,8 +110,9 @@ services:
       issuer-scraper:
         condition: service_healthy
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+
   issuer-scraper:
     build:
       context: ./services/scrapers
@@ -132,8 +132,8 @@ services:
       retries: 5
       start_period: 40s
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
 
   news-scraper:
     build:
@@ -148,8 +148,8 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
 
   issuer-news-scraper:
     build:
@@ -172,8 +172,8 @@ services:
       retries: 5
       start_period: 40s
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
