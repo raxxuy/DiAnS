@@ -1,11 +1,16 @@
 import requests
 from io import BytesIO
-from aiohttp import ClientSession
-from datetime import datetime, timedelta
 from PyPDF2 import PdfReader
+from typing import List, Tuple, Optional
+from aiohttp import ClientSession
+from datetime import datetime, timedelta, date
+
+# Type aliases
+NewsID = int
+NewsContent = Tuple[int, str, date, List[str]]  # (seinet_id, content, date, attachments)
 
 
-async def fetch_news(issuer_id, last_date):
+async def fetch_news(issuer_id: int, last_date: Optional[date]) -> List[NewsID]:
     if last_date is None:
         last_date = datetime.now() - timedelta(days=365)
 
@@ -31,7 +36,7 @@ async def fetch_news(issuer_id, last_date):
             return [item["documentId"] for item in json_data]
 
 
-async def fetch_article(news_id):
+async def fetch_article(news_id: int) -> Optional[NewsContent]:
     url = f"https://api.seinet.com.mk/public/documents/single/{news_id}"
 
     async with ClientSession() as session:
@@ -41,16 +46,16 @@ async def fetch_article(news_id):
             
             json_data = await response.json()
 
-            if not json_data.get("data"):
+            if not json_data["data"]:
                 return None
 
             article = json_data["data"]
-            seinet_id = article.get("documentId")
+            seinet_id = article["documentId"]
             content = article.get("content", "")
-            date = datetime.strptime(article.get("publishedDate").split(".")[0], "%Y-%m-%dT%H:%M:%S").date()
+            date = datetime.strptime(article["publishedDate"].split(".")[0], "%Y-%m-%dT%H:%M:%S").date()
             
-            attachment_content = []
-            attachments = article.get("attachments", [])
+            attachment_content: List[str] = []
+            attachments = article["attachments"]
             
             if attachments:
                 for attachment in attachments:
@@ -61,12 +66,12 @@ async def fetch_article(news_id):
             return seinet_id, content, date, attachment_content
 
 
-def fetch_attachment(attachment_id):
+def fetch_attachment(attachment_id: int) -> List[str]:
     url = f"https://api.seinet.com.mk/public/documents/attachment/{attachment_id}"
 
     with requests.get(url) as response:
         pdf = PdfReader(BytesIO(response.content))
-        contents = []
+        contents: List[str] = []
         
         for page in pdf.pages:
             text = page.extract_text()

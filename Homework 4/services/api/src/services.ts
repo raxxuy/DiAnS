@@ -7,23 +7,44 @@ import {
   TechnicalAnalyzerServiceType,
   FundamentalAnalyzerServiceType,
   LSTMAnalyzerServiceType,
-  TechnicalAnalysis
+  TechnicalAnalysis,
+  FundamentalAnalysis,
+  LSTMPrediction
 } from "./types";
 
-export class IssuerService implements IssuerServiceType {
+/**
+ * Base class for implementing singleton pattern
+ */
+abstract class SingletonService {
+  protected constructor() {}
+
+  protected static createInstance<T>(this: new () => T): T {
+    if (!(this as any).instance) {
+      (this as any).instance = new this();
+    }
+    return (this as any).instance;
+  }
+}
+
+/**
+ * Service for managing issuer data
+ */
+export class IssuerService extends SingletonService implements IssuerServiceType {
   private static instance: IssuerService;
 
-  private constructor() {}
-
-  static getInstance() {
-    if (!IssuerService.instance) {
-      IssuerService.instance = new IssuerService();
-    }
-    return IssuerService.instance;
+  private constructor() {
+    super();
+  }
+  static getInstance(): IssuerService {
+    return super.createInstance<IssuerService>();
   }
 
   async getAll(prisma: PrismaClient) {
     return await prisma.issuer.findMany();
+  }
+
+  async getById(prisma: PrismaClient, id: number) {
+    return await prisma.issuer.findUnique({ where: { id } });
   }
 
   async getByCode(prisma: PrismaClient, code: string) {
@@ -31,41 +52,53 @@ export class IssuerService implements IssuerServiceType {
   }
 }
 
-export class CompanyService implements CompanyServiceType {
+/**
+ * Service for managing company data
+ */
+export class CompanyService extends SingletonService implements CompanyServiceType {
   private static instance: CompanyService;
 
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
-  static getInstance() {
-    if (!CompanyService.instance) {
-      CompanyService.instance = new CompanyService();
-    }
-    return CompanyService.instance;
+  static getInstance(): CompanyService {
+    return super.createInstance<CompanyService>();
   }
 
   async getAll(prisma: PrismaClient, locale: string) {
-    return locale === "en" ? await prisma.company.findMany() : await prisma.company_mk.findMany();
+    return locale === "en" 
+      ? await prisma.company.findMany() 
+      : await prisma.company_mk.findMany();
   }
 
   async getById(prisma: PrismaClient, id: number, locale: string) {
-    return locale === "en" ? await prisma.company.findUnique({ where: { id: id } }) : await prisma.company_mk.findUnique({ where: { id: id } });
+    return locale === "en"
+      ? await prisma.company.findUnique({ where: { id } })
+      : await prisma.company_mk.findUnique({ where: { id } });
   }
+
+  async getByCode(prisma: PrismaClient, code: string, locale: string) {}
 }
 
-export class StockService implements StockServiceType {
+/**
+ * Service for managing stock history data
+ */
+export class StockService extends SingletonService implements StockServiceType {
   private static instance: StockService;
 
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
-  static getInstance() {
-    if (!StockService.instance) {
-      StockService.instance = new StockService();
-    }
-    return StockService.instance;
+  static getInstance(): StockService {
+    return super.createInstance<StockService>();
   }
 
   async getAll(prisma: PrismaClient) {
-    return await prisma.stockhistory.findMany({ include: { issuer: true } });
+    return await prisma.stockhistory.findMany({ 
+      include: { issuer: true } 
+    });
   }
 
   async getByIssuerId(prisma: PrismaClient, issuerId: number) {
@@ -76,42 +109,52 @@ export class StockService implements StockServiceType {
   }
 }
 
-export class NewsService implements NewsServiceType {
+/**
+ * Service for managing news data
+ */
+export class NewsService extends SingletonService implements NewsServiceType {
   private static instance: NewsService;
 
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
-  static getInstance() {
-    if (!NewsService.instance) {
-      NewsService.instance = new NewsService();
-    }
-    return NewsService.instance;
+  static getInstance(): NewsService {
+    return super.createInstance<NewsService>();
   }
 
   async getAll(prisma: PrismaClient, locale: string) {
-    return await prisma.news.findMany({ where: { locale: locale } });
+    return await prisma.news.findMany({ 
+      where: { locale } 
+    });
   }
 
   async getById(prisma: PrismaClient, id: number, locale: string) {
-    return await prisma.news.findUnique({ where: {
-      shared_id_locale: {
-        shared_id: id,
-        locale: locale
+    return await prisma.news.findUnique({ 
+      where: {
+        shared_id_locale: {
+          shared_id: id,
+          locale: locale
+        }
       }
-    }});
+    });
   }
+
+  async getByCode(prisma: PrismaClient, code: string, locale: string) {}
 }
 
-export class TechnicalAnalyzerService implements TechnicalAnalyzerServiceType {
+/**
+ * Service for technical analysis
+ */
+export class TechnicalAnalyzerService extends SingletonService implements TechnicalAnalyzerServiceType {
   private static instance: TechnicalAnalyzerService;
 
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
-  static getInstance() {
-    if (!TechnicalAnalyzerService.instance) {
-      TechnicalAnalyzerService.instance = new TechnicalAnalyzerService();
-    }
-    return TechnicalAnalyzerService.instance;
+  static getInstance(): TechnicalAnalyzerService {
+    return super.createInstance<TechnicalAnalyzerService>();
   }
 
   async getTechnicalAnalysis(prisma: PrismaClient, issuerId: number): Promise<TechnicalAnalysis | null> {
@@ -127,6 +170,7 @@ export class TechnicalAnalyzerService implements TechnicalAnalyzerServiceType {
     const movingAverages = technicalAnalysis.moving_averages as any;
 
     const defaultIndicator = {
+      name: '',
       daily: 0,
       weekly: 0,
       monthly: 0,
@@ -152,20 +196,24 @@ export class TechnicalAnalyzerService implements TechnicalAnalyzerServiceType {
   }
 }
 
-export class FundamentalAnalyzerService implements FundamentalAnalyzerServiceType {
+/**
+ * Service for fundamental analysis
+ */
+export class FundamentalAnalyzerService extends SingletonService implements FundamentalAnalyzerServiceType {
   private static instance: FundamentalAnalyzerService;
 
-  private constructor() {}
-
-  static getInstance() {
-    if (!FundamentalAnalyzerService.instance) {
-      FundamentalAnalyzerService.instance = new FundamentalAnalyzerService();
-    }
-    return FundamentalAnalyzerService.instance;
+  private constructor() {
+    super();
   }
 
-  async getFundamentalAnalysis(prisma: PrismaClient, issuerId: number) {
-    const sentiments = await prisma.news_sentiment.findMany({ where: { issuer_id: issuerId } });
+  static getInstance(): FundamentalAnalyzerService {
+    return super.createInstance<FundamentalAnalyzerService>();
+  }
+
+  async getFundamentalAnalysis(prisma: PrismaClient, issuerId: number): Promise<FundamentalAnalysis | null> {
+    const sentiments = await prisma.news_sentiment.findMany({ 
+      where: { issuer_id: issuerId } 
+    });
 
     if (sentiments.length === 0) {
       return null;
@@ -188,20 +236,24 @@ export class FundamentalAnalyzerService implements FundamentalAnalyzerServiceTyp
   }
 }
 
-export class LSTMAnalyzerService implements LSTMAnalyzerServiceType {
+/**
+ * Service for LSTM predictions
+ */
+export class LSTMAnalyzerService extends SingletonService implements LSTMAnalyzerServiceType {
   private static instance: LSTMAnalyzerService;
 
-  private constructor() {}
-
-  static getInstance() {
-    if (!LSTMAnalyzerService.instance) {
-      LSTMAnalyzerService.instance = new LSTMAnalyzerService();
-    }
-    return LSTMAnalyzerService.instance;
+  private constructor() {
+    super();
   }
 
-  async getLSTMAnalysis(prisma: PrismaClient, issuerId: number) {
-    const predictions = await prisma.lstm_predictions.findMany({ where: { issuer_id: issuerId } });
+  static getInstance(): LSTMAnalyzerService {
+    return super.createInstance<LSTMAnalyzerService>();
+  }
+
+  async getLSTMAnalysis(prisma: PrismaClient, issuerId: number): Promise<LSTMPrediction[] | null> {
+    const predictions = await prisma.lstm_predictions.findMany({ 
+      where: { issuer_id: issuerId } 
+    });
 
     return predictions.map(prediction => ({
       prediction_date: prediction.prediction_date.toISOString(),

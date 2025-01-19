@@ -14,6 +14,7 @@ export default function LanguageSelector() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  
   const handleLanguageChange = (langCode: string) => {
     router.replace(pathname + window.location.search, { locale: langCode });
     setIsOpen(false);

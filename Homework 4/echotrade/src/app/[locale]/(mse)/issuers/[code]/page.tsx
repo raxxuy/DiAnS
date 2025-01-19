@@ -1,20 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { issuer, company } from "@prisma/client";
+import { issuer as Issuer, company as Company } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function Issuer() {
+export default function IssuerPage() {
   const t = useTranslations("Issuer");
   const locale = useLocale();
-
+  
   const { code } = useParams();
-  const [issuer, setIssuer] = useState<issuer>();
-  const [company, setCompany] = useState<company>();
+  const [issuer, setIssuer] = useState<Issuer>();
+  const [company, setCompany] = useState<Company>();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

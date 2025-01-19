@@ -4,15 +4,15 @@ import { useParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useEffect } from "react";
 import { useState } from "react";
-import { news } from "@prisma/client";
+import { news as News } from "@prisma/client";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function NewsItem() {
+export default function NewsItemPage() {
   const locale = useLocale();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
-  const [news, setNews] = useState<news>();
+  const [news, setNews] = useState<News>();
 
   useEffect(() => {
     fetch(`${apiUrl}/api/news/${id}?locale=${locale}`)

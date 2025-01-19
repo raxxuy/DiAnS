@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
+import { useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { lstm_predictions as LSTMPredictions } from "@prisma/client";
 
-export default function LSTMChart({
-  predictions
-}: {
-  predictions: any[]
-}) {
+export default function LSTMChart({ predictions }: { predictions: LSTMPredictions[] }) {
   const t = useTranslations("LSTMChart");
   const locale = useLocale();
 
   const chartRef = useRef<HTMLCanvasElement>(null);
-  const chartInstance = useRef<Chart | null>(null);
+  const chartInstance = useRef<Chart>();
 
   useEffect(() => {
     return () => {

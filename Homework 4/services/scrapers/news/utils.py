@@ -1,9 +1,13 @@
+from typing import List, Tuple, Optional
 from aiohttp import ClientSession
-from datetime import datetime
+from datetime import datetime, date
 from bs4 import BeautifulSoup, SoupStrainer
 
+# Type aliases
+NewsContent = Optional[Tuple[str, str, List[str]]]  # (title, date, content) or None
 
-async def fetch_news(link):
+
+async def fetch_news(link: str) -> NewsContent:
     url = f"https://www.mse.mk{link}"
 
     async with ClientSession() as session:
@@ -20,14 +24,13 @@ async def fetch_news(link):
             return title, date, content
         
         
-def parse_macedonian_date(date):
+def parse_macedonian_date(date_str: str) -> date:
     mk_months = {
         'јануари': '01', 'февруари': '02', 'март': '03', 'април': '04',
         'мај': '05', 'јуни': '06', 'јули': '07', 'август': '08',
         'септември': '09', 'октомври': '10', 'ноември': '11', 'декември': '12'
     }
 
-    _, day, month, year = date.split()
+    _, day, month, year = date_str.split()
     formatted_date = f"{year}-{mk_months[month]}-{day.zfill(2)}"
-    parsed_date = datetime.strptime(formatted_date, "%Y-%m-%d").date()
-    return parsed_date
+    return datetime.strptime(formatted_date, "%Y-%m-%d").date()

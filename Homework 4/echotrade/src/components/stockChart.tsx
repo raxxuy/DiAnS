@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { stockhistory } from "@prisma/client";
 import Chart from "chart.js/auto";
+import { useEffect, useRef } from "react";
+import { stockhistory as StockHistory } from "@prisma/client";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function StockChart({
   stockHistory
 }: {
-  stockHistory: stockhistory[]
+  stockHistory: StockHistory[]
 }) {
   const t = useTranslations("StockChart");
   const locale = useLocale();
 
   const chartRef = useRef<HTMLCanvasElement>(null);
-  const chartInstance = useRef<Chart | null>(null);
+  const chartInstance = useRef<Chart>();
 
   useEffect(() => {
     return () => {

@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { issuer } from "@prisma/client";
 import LSTMChart from "./lstmChart";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { issuer as Issuer, lstm_predictions as LSTMPredictions } from "@prisma/client";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function LSTMPredictions({ selectedIssuer }: { selectedIssuer?: issuer }) {
+export default function LSTMPredictionsSection({ selectedIssuer }: { selectedIssuer?: Issuer }) {
   const t = useTranslations("LSTMPredictions");
 
-  const [predictions, setPredictions] = useState<any[]>([]);
+  const [predictions, setPredictions] = useState<LSTMPredictions[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

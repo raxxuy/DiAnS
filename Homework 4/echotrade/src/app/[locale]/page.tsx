@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 
-export default function Home() {
+export default function HomePage() {
   const t = useTranslations("Home");
   const locale = useLocale();
 

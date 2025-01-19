@@ -1,30 +1,36 @@
 "use client";
 
+import Link from "next/link";
 import SearchBar from "@/components/searchBar";
 import { useEffect, useState } from "react";
-import { company, issuer } from "@prisma/client";
-import Link from "next/link";
+import { company as Company, issuer as Issuer } from "@prisma/client";
 import { useLocale, useTranslations } from "next-intl";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function Issuers() {
+export default function IssuersPage() {
   const t = useTranslations("Issuers");
   const locale = useLocale();
 
-  const [companies, setCompanies] = useState<company[]>([]);
-  const [issuers, setIssuers] = useState<issuer[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [filteredIssuers, setFilteredIssuers] = useState<Issuer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const filteredIssuers = issuers.filter(issuer => 
-    issuer.code.toLowerCase().includes(search.toLowerCase())
-  );
+
+  useEffect(() => {
+    const searchTerm = search.toLowerCase();
+    const filtered = issuers.filter(issuer => 
+      issuer.code.toLowerCase().includes(searchTerm)
+    );
+    setFilteredIssuers(filtered);
+  }, [search, issuers]);
 
   useEffect(() => {
     fetch(`${apiUrl}/api/issuers`)
       .then(res => res.json())
       .then(data => {
-        setIssuers(data.sort((a: issuer, b: issuer) => a.code.localeCompare(b.code)));
+        setIssuers(data.sort((a: Issuer, b: Issuer) => a.code.localeCompare(b.code)));
         fetch(`${apiUrl}/api/companies?locale=${locale}`)
           .then(res => res.json())
           .then(companyData => {

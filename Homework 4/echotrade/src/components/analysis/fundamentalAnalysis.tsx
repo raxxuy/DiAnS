@@ -1,8 +1,9 @@
 "use client";
 
-import { issuer } from "@prisma/client";
+import { issuer as Issuer } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { FundamentalAnalysis } from "@/types";
 
 const recommendationColors = {
   'STRONG BUY': 'text-green-400',
@@ -14,11 +15,11 @@ const recommendationColors = {
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function FundamentalAnalysis({ selectedIssuer }: { selectedIssuer?: issuer }) {
+export default function FundamentalAnalysisSection({ selectedIssuer }: { selectedIssuer?: Issuer }) {
   const t = useTranslations("FundamentalAnalysis");
   const locale = useLocale();
 
-  const [analysis, setAnalysis] = useState<any | null>(null);
+  const [analysis, setAnalysis] = useState<FundamentalAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {

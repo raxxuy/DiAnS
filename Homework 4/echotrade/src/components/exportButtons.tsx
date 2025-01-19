@@ -1,9 +1,9 @@
+import { stockhistory as StockHistory } from '@prisma/client';
 import { saveAs } from 'file-saver';
+import autoTable from "jspdf-autotable";
 import * as XLSX from 'xlsx-js-style';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { stockhistory } from '@prisma/client';
-import autoTable from "jspdf-autotable";
 
 export default function ExportButtons({ 
   stockHistory, 
@@ -11,7 +11,7 @@ export default function ExportButtons({
   fromDate, 
   toDate 
 }: { 
-  stockHistory: stockhistory[], 
+  stockHistory: StockHistory[], 
   code?: string, 
   fromDate: string, 
   toDate: string 

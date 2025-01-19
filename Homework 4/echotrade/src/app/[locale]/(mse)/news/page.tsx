@@ -1,31 +1,37 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { news } from "@prisma/client";
 import Link from "next/link";
-import SearchBar from "@/components/searchBar";
+import { news as News } from "@prisma/client";
+import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import SearchBar from "@/components/searchBar";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function News() {
+export default function NewsPage() {
   const t = useTranslations("News");
   const locale = useLocale();
   
-  const [news, setNews] = useState<news[]>([]);
+  const [news, setNews] = useState<News[]>([]);
+  const [filteredNews, setFilteredNews] = useState<News[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 8;
-  const filteredNews = news.filter(n => 
-    n.title.toLowerCase().includes(search.toLowerCase())
-  );
+  
+  useEffect(() => {
+    const searchTerm = search.toLowerCase();
+    const filtered = news.filter(n => 
+      n.title.toLowerCase().includes(searchTerm)
+    );
+    setFilteredNews(filtered);
+  }, [search, news]);
 
   useEffect(() => {
     fetch(`${apiUrl}/api/news?locale=${locale}`)
       .then(res => res.json())
       .then(data => {
-        setNews(data.sort((a: news, b: news) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        setNews(data.sort((a: News, b: News) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         setIsLoading(false);
       });
   }, [locale]);

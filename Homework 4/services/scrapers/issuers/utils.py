@@ -1,11 +1,17 @@
 import time
 import asyncio
+from typing import List
 from aiohttp import ClientSession
 from aiolimiter import AsyncLimiter
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, SoupStrainer
 
-async def fetch_company(code, locale):
+# Type aliases
+CompanyData = List[str]  # [code, name, address, city, state, email, website, contact_person, phones, fax]
+StockHistory = List[List[str]]  # [date, last_trade_price, max_price, min_price, avg_price, percent_change, volume, turnover_best, total_turnover]
+
+
+async def fetch_company(code: str, locale: str) -> CompanyData:
     url = f"https://www.mse.mk/{locale}/symbol/{code}"
 
     translate_to_en = {
@@ -72,38 +78,40 @@ async def fetch_company(code, locale):
 
     return list(company_data.values())
 
-async def fetch_stock_history(code, last_date):
-    to_time = datetime.now().date()
-    from_time = last_date
-    limiter = AsyncLimiter(max_rate=15, time_period=1)
 
-    data = []
+async def fetch_stock_history(code: str, from_date: datetime) -> StockHistory:
+    to_time = datetime.now().date()
+    limiter = AsyncLimiter(max_rate=10, time_period=1)
+
+    data: StockHistory = []
     tasks = []
 
-    async def fetch_data(url_):
+    async def fetch_data(url: str) -> StockHistory:
         async with limiter:  # Apply rate limiting
             async with ClientSession() as session:
-                async with session.get(url_) as response:
+                async with session.get(url) as response:
                     if response.status != 200:
                         time.sleep(1)
-                        return await fetch_data(url_)
+                        return await fetch_data(url)
 
                     response_text = await response.text()
                     soup = BeautifulSoup(response_text, 'lxml', parse_only=SoupStrainer('tbody'))
-
                     rows = soup.select("tbody tr")
-                    fetched_data = []
+                    
+                    fetched_data: StockHistory = []
+                    
                     for row in rows:
                         cols = [col.text.strip() for col in row.select("td")]
                         if any(col == "" for col in cols):
                             continue
                         fetched_data.append(cols)
+                        
                     return fetched_data
 
-    while to_time > from_time:
+    while to_time > from_date:
         to_date = to_time.strftime("%d,%m,%Y")
-        from_date = from_time.strftime("%d,%m,%Y")
-        url = f"https://www.mse.mk/mk/stats/symbolhistory/{code}?FromDate={from_date}&ToDate={to_date}"
+        from_date_str = from_date.strftime("%d,%m,%Y")
+        url = f"https://www.mse.mk/mk/stats/symbolhistory/{code}?FromDate={from_date_str}&ToDate={to_date}"
         tasks.append(fetch_data(url))
         to_time -= timedelta(days=365)
 
@@ -114,4 +122,4 @@ async def fetch_stock_history(code, last_date):
             if row not in data:
                 data.append(row)
 
-    return data
+    return data if data else None

@@ -1,16 +1,27 @@
-from asyncpg import create_pool, Pool
+from typing import Optional, List, Dict, Any, Sequence
+from asyncpg import create_pool, Pool, Record
+from datetime import timedelta, date
 import json
-from datetime import datetime, timedelta
+
+# Type aliases
+StockRecord = Record  # Stock history record from database
+IssuerRecord = Record  # Issuer record from database
+NewsRecord = Record  # News record from database
+JsonDict = Dict[str, Any]  # JSON-serializable dictionary
 
 class Database:
-    def __init__(self, user, password, database, host):
-        self.pool: Pool | None = None
+    """Database interface for market analysis operations"""
+    
+    def __init__(self, user: str, password: str, database: str, host: str) -> None:
+        """Initialize database connection parameters."""
+        self.pool: Optional[Pool] = None
         self.user = user
         self.password = password
         self.database = database
         self.host = host
 
-    async def connect(self):
+    async def connect(self) -> None:
+        """Create connection pool to database"""
         self.pool = await create_pool(
             user=self.user,
             password=self.password,
@@ -20,12 +31,14 @@ class Database:
             max_size=15
         )
 
-    async def close(self):
+    async def close(self) -> None:
+        """Close database connection pool"""
         if self.pool:
             await self.pool.close()
             self.pool = None
     
-    async def create_news_sentiment_table(self):
+    async def create_news_sentiment_table(self) -> None:
+        """Create news sentiment table if it doesn't exist"""
         query = """
             CREATE TABLE IF NOT EXISTS news_sentiment (
                 id SERIAL PRIMARY KEY,
@@ -41,13 +54,12 @@ class Database:
         async with self.pool.acquire() as conn:
             await conn.execute(query)
             
-    async def create_technical_analysis_table(self):
-        # Drop existing table if exists
+    async def create_technical_analysis_table(self) -> None:
+        """Create or recreate technical analysis table"""
         drop_query = """
             DROP TABLE IF EXISTS technical_analysis CASCADE;
         """
         
-        # Create new table
         create_query = """
             CREATE TABLE technical_analysis (
                 id SERIAL PRIMARY KEY,
@@ -72,8 +84,8 @@ class Database:
                 await conn.execute(drop_query)
                 await conn.execute(create_query)
                 
-    async def create_lstm_predictions_table(self):
-        # Drop existing table to recreate with proper constraints
+    async def create_lstm_predictions_table(self) -> None:
+        """Create or recreate LSTM predictions table"""
         drop_query = """
             DROP TABLE IF EXISTS lstm_predictions CASCADE;
         """
@@ -94,7 +106,8 @@ class Database:
                 await conn.execute(drop_query)
                 await conn.execute(create_query)
         
-    async def get_unprocessed_news(self):
+    async def get_unprocessed_news(self) -> List[NewsRecord]:
+        """Get unprocessed news articles"""
         query = """
             SELECT i.id, i.content, i.attachments, i.issuer_id
             FROM issuer_news i
@@ -105,7 +118,8 @@ class Database:
         async with self.pool.acquire() as conn:
             return await conn.fetch(query)
 
-    async def add_news_sentiment(self, issuer_id, issuer_news_id, sentiment):
+    async def add_news_sentiment(self, issuer_id: int, issuer_news_id: int, sentiment: float) -> None:
+        """Add sentiment analysis result for a news article"""
         query = """
             INSERT INTO news_sentiment (issuer_id, issuer_news_id, sentiment)
             VALUES ($1, $2, $3)
@@ -115,7 +129,8 @@ class Database:
         async with self.pool.acquire() as conn:
             await conn.execute(query, issuer_id, issuer_news_id, sentiment)
 
-    async def get_stocks(self):
+    async def get_stocks(self) -> List[StockRecord]:
+        """Get stock records from the last year"""
         query = """
             SELECT id, issuer_id FROM stockhistory
             WHERE date >= CURRENT_DATE - INTERVAL '365 days'
@@ -125,7 +140,8 @@ class Database:
         async with self.pool.acquire() as conn:
             return await conn.fetch(query)
 
-    async def get_stock_history(self, stock_id):
+    async def get_stock_history(self, stock_id: int) -> List[StockRecord]:
+        """Get historical data for a specific stock"""
         query = """
             SELECT date, max_price, min_price, avg_price, volume
             FROM stockhistory 
@@ -136,7 +152,10 @@ class Database:
         async with self.pool.acquire() as conn:
             return await conn.fetch(query, stock_id)
 
-    async def store_technical_analysis(self, issuer_id, moving_averages, oscillators):
+    async def store_technical_analysis(self, issuer_id: int, 
+                                     moving_averages: JsonDict,
+                                     oscillators: JsonDict) -> int:
+        """Store technical analysis results for an issuer"""
         delete_query = """
             DELETE FROM technical_analysis 
             WHERE issuer_id = $1 
@@ -158,7 +177,9 @@ class Database:
                 result = await conn.fetchrow(insert_query, issuer_id, moving_averages_json, oscillators_json)
                 return result['id']
             
-    async def save_lstm_predictions(self, issuer_id, predictions, start_date):
+    async def save_lstm_predictions(self, issuer_id: int, predictions: Sequence[float], 
+                                  start_date: date) -> None:
+        """Save LSTM model predictions for an issuer"""
         query = """
             INSERT INTO lstm_predictions (issuer_id, prediction_date, predicted_price)
             VALUES ($1, $2, $3)
@@ -171,14 +192,16 @@ class Database:
                 pred_date = start_date + timedelta(days=i)
                 await conn.execute(query, issuer_id, pred_date, pred)
             
-    async def get_issuers(self):
+    async def get_issuers(self) -> List[IssuerRecord]:
+        """Get all issuers"""
         query = """
             SELECT code, id FROM issuer
         """
         async with self.pool.acquire() as conn:
             return await conn.fetch(query)
 
-    async def get_issuer_stocks(self, issuer_id):
+    async def get_issuer_stocks(self, issuer_id: int) -> List[StockRecord]:
+        """Get stock history for a specific issuer"""
         query = """
             SELECT avg_price, date FROM stockhistory
             WHERE issuer_id = $1

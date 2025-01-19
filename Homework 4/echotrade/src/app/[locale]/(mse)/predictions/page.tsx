@@ -1,36 +1,35 @@
 "use client";
 
-import { issuer } from "@prisma/client";
+import { issuer as Issuer } from "@prisma/client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import TechnicalAnalysis from "@/components/analysis/technicalAnalysis";
 import FundamentalAnalysis from "@/components/analysis/fundamentalAnalysis";
 import LSTMPredictions from "@/components/analysis/lstmPredictions";
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function Predictions() {
+export default function PredictionsPage() {
   const t = useTranslations("Predictions");
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
-  const [issuers, setIssuers] = useState<issuer[]>([]);
-  const [selectedIssuer, setSelectedIssuer] = useState<issuer>();
+  const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [selectedIssuer, setSelectedIssuer] = useState<Issuer>();
 
   useEffect(() => {
     fetch(`${apiUrl}/api/issuers`)
       .then(res => res.json())
       .then(data => {
-        setIssuers(data.sort((a: issuer, b: issuer) => a.code.localeCompare(b.code)));
-        setSelectedIssuer(code ? data.find((i: issuer) => i.code === code) : undefined);
+        setIssuers(data.sort((a: Issuer, b: Issuer) => a.code.localeCompare(b.code)));
+        setSelectedIssuer(code ? data.find((i: Issuer) => i.code === code) : undefined);
       });
   }, [code]);
 
   const handleIssuerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedIssuer(issuers.find(i => i.code === e.target.value));
     router.replace(`/predictions?code=${e.target.value}`);
   };
 

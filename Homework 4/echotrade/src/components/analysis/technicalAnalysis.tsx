@@ -1,41 +1,13 @@
 "use client"
 
-import { issuer } from "@prisma/client";
+import { issuer as Issuer } from "@prisma/client";
 import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect } from "react";
-
-export type TechnicalAnalysis = {
-  oscillators: OscillatorAnalysis;
-  moving_averages: MovingAverageAnalysis;
-}
-
-export type MovingAverageAnalysis = {
-  ema: IndicatorWithPeriods;
-  sma: IndicatorWithPeriods;
-  wma: IndicatorWithPeriods;
-  dema: IndicatorWithPeriods;
-  wema: IndicatorWithPeriods;
-};
-
-export type OscillatorAnalysis = {
-  cci: IndicatorWithPeriods;
-  rsi: IndicatorWithPeriods;
-  macd: IndicatorWithPeriods;
-  stochastic: IndicatorWithPeriods;
-  williamsR: IndicatorWithPeriods;
-};
-
-export type IndicatorWithPeriods = {
-  name: string;
-  daily: number;
-  weekly: number;
-  monthly: number;
-  signal: 'buy' | 'sell' | 'hold';
-};
+import { TechnicalAnalysis } from "@/types";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";
 
-export default function TechnicalAnalysis({ selectedIssuer }: { selectedIssuer?: issuer }) {
+export default function TechnicalAnalysisSection({ selectedIssuer }: { selectedIssuer?: Issuer }) {
   const t = useTranslations("TechnicalAnalysis");
   const locale = useLocale();
   

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { issuer, stockhistory } from "@prisma/client";
-import ExportButtons from "@/components/exportButtons";
-import StockChart from "@/components/stockChart";
+import { issuer as Issuer, stockhistory as StockHistory } from "@prisma/client";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
+import ExportButtons from "@/components/exportButtons";
+import StockChart from "@/components/stockChart";
 
 const apiUrl = process.env.API_URL || "http://localhost:5000";  
 
@@ -17,9 +17,9 @@ export default function MarketData() {
 
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
-  const [stockHistory, setStockHistory] = useState<stockhistory[]>([]);
-  const [issuers, setIssuers] = useState<issuer[]>([]);
-  const [selectedIssuer, setSelectedIssuer] = useState<issuer>();
+  const [stockHistory, setStockHistory] = useState<StockHistory[]>([]);
+  const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [selectedIssuer, setSelectedIssuer] = useState<Issuer>();
   const [fromDate, setFromDate] = useState<string>(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   const [toDate, setToDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [viewMode, setViewMode] = useState<"table" | "chart">("table");
@@ -29,13 +29,16 @@ export default function MarketData() {
     fetch(`${apiUrl}/api/issuers`)
       .then(res => res.json())
       .then(data => {
-        setIssuers(data.sort((a: issuer, b: issuer) => a.code.localeCompare(b.code)));
-        setSelectedIssuer(code ? data.find((i: issuer) => i.code === code) : undefined);
+        setIssuers(data.sort((a: Issuer, b: Issuer) => a.code.localeCompare(b.code)));
+        setSelectedIssuer(code ? data.find((i: Issuer) => i.code === code) : undefined);
       });
   }, [code]);
 
   useEffect(() => {
-    if (!selectedIssuer) return;
+    if (!selectedIssuer) {
+      setStockHistory([]);
+      return;
+    }
 
     if (fromDate && toDate) {
       setIsLoading(true);
@@ -43,8 +46,8 @@ export default function MarketData() {
         .then(res => res.json())
         .then(data => {
           const filteredHistory = data
-            .filter((h: stockhistory) => new Date(h.date).getTime() >= new Date(fromDate).getTime() && new Date(h.date).getTime() <= new Date(toDate).getTime())
-            .sort((a: stockhistory, b: stockhistory) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            .filter((h: StockHistory) => new Date(h.date).getTime() >= new Date(fromDate).getTime() && new Date(h.date).getTime() <= new Date(toDate).getTime())
+            .sort((a: StockHistory, b: StockHistory) => new Date(a.date).getTime() - new Date(b.date).getTime());
           setStockHistory(filteredHistory);
         })
         .finally(() => setIsLoading(false));
@@ -52,7 +55,6 @@ export default function MarketData() {
   }, [selectedIssuer, fromDate, toDate]);
 
   const handleIssuerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedIssuer(issuers.find(i => i.code === e.target.value));
     router.replace(`/market-data?code=${e.target.value}`);
   };
 
